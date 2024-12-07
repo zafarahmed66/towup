@@ -8,6 +8,7 @@ import { SignupSection, SignupContainer, Title, Subtitle, SubmitButton } from '.
 import { FleetOwnerFormValues } from './types';
 import { fleetOwnerValidationSchema } from './validationSchemas';
 
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 const FleetOwnerSignupForm = () => {
   const navigate = useNavigate();
 
@@ -41,7 +42,7 @@ const FleetOwnerSignupForm = () => {
     validationSchema: fleetOwnerValidationSchema,
     onSubmit: async (values) => {
       try {
-        const response = await fetch('/api/fleetowners/signup', {
+        const response = await fetch(`${API_BASE_URL}/api/fleetowners/signup`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',

@@ -7,6 +7,7 @@ import UserAccountSection from './sections/UserAccountSection';
 import { SignupSection, SignupContainer, Title, Subtitle, SubmitButton } from './StyledFormComponents';
 import { RepoCompanyFormValues } from './types';
 
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 const validationSchema = Yup.object({
   companyName: Yup.string().required('Company name is required'),
   phoneNumber: Yup.string().required('Phone number is required'),
@@ -52,7 +53,7 @@ const RepoCompanySignupForm = () => {
     validationSchema,
     onSubmit: async (values) => {
       try {
-        const response = await fetch('/api/repo-companies/signup', {
+        const response = await fetch(`${API_BASE_URL}/api/repo-companies/signup`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
