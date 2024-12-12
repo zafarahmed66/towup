@@ -6,8 +6,8 @@ import AddressSection from './sections/AddressSection';
 import UserAccountSection from './sections/UserAccountSection';
 import { SignupSection, SignupContainer, Title, Subtitle, SubmitButton } from './StyledFormComponents';
 import { RepoCompanyFormValues } from './types';
+import { signUpAsRepoCompany } from '../../controller/authController';
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 const validationSchema = Yup.object({
   companyName: Yup.string().required('Company name is required'),
   phoneNumber: Yup.string().required('Phone number is required'),
@@ -43,6 +43,8 @@ const RepoCompanySignupForm = () => {
         fullname: '',
         email: '',
         password: '',
+        confirmPassword: '',
+        phoneNumber: '',
         appNotificationSetting: {
           emailNotificationEnabled: true,
           smsNotificationEnabled: false,
@@ -53,19 +55,13 @@ const RepoCompanySignupForm = () => {
     validationSchema,
     onSubmit: async (values) => {
       try {
-        const response = await fetch(`${API_BASE_URL}/api/repo-companies/signup`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify(values),
-        });
+        const response = await signUpAsRepoCompany({...values, user: {...values.user, phoneNumber: values.phoneNumber }})
 
-        if (response.ok) {
+        if (response) {
           navigate('/login?signup=success');
         } else {
-          const error = await response.text();
-          alert('Signup failed: ' + error);
+          // const error = await response.text();
+          // alert('Signup failed: ' + error);
         }
       } catch (error) {
         console.error('Signup error:', error);
