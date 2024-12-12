@@ -41,6 +41,17 @@ const UserAccountSection = ({ formik }: UserAccountSectionProps) => {
           <ErrorMessage>{formik.errors.user.password}</ErrorMessage>
         )}
       </InputGroup>
+      <InputGroup>
+        <Label htmlFor="user.password">Confirm Password</Label>
+        <Input
+          id="user.confirmPassword"
+          type="password"
+          {...formik.getFieldProps('user.confirmPassword')}
+        />
+        {formik.touched.user?.confirmPassword && formik.errors.user?.confirmPassword && (
+          <ErrorMessage>{formik.errors.user.confirmPassword}</ErrorMessage>
+        )}
+      </InputGroup>
     </FormSection>
   );
 };
