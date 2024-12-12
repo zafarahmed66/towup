@@ -1,4 +1,4 @@
-import { FormSection, FormGroupTitle, InputGroup, InputRow, Label, Input } from '../StyledFormComponents';
+import { FormSection, FormGroupTitle, InputGroup, InputRow, Label, Input, ErrorMessage } from '../StyledFormComponents';
 import { FormikFleetOwnerType, FormikRepoCompanyType } from '../types';
 
 interface AddressSectionProps {
@@ -16,7 +16,7 @@ const AddressSection = ({ formik }: AddressSectionProps) => {
           {...formik.getFieldProps('address.street')}
         />
         {formik.touched.address?.street && formik.errors.address?.street && (
-          <div className="error">{formik.errors.address.street}</div>
+          <ErrorMessage>{formik.errors.address.street}</ErrorMessage>
         )}
       </InputGroup>
       <InputRow>
@@ -27,7 +27,7 @@ const AddressSection = ({ formik }: AddressSectionProps) => {
             {...formik.getFieldProps('address.city')}
           />
           {formik.touched.address?.city && formik.errors.address?.city && (
-            <div className="error">{formik.errors.address.city}</div>
+            <ErrorMessage>{formik.errors.address.city}</ErrorMessage>
           )}
         </InputGroup>
         <InputGroup>
@@ -37,7 +37,7 @@ const AddressSection = ({ formik }: AddressSectionProps) => {
             {...formik.getFieldProps('address.state')}
           />
           {formik.touched.address?.state && formik.errors.address?.state && (
-            <div className="error">{formik.errors.address.state}</div>
+            <ErrorMessage>{formik.errors.address.state}</ErrorMessage>
           )}
         </InputGroup>
       </InputRow>
@@ -49,7 +49,7 @@ const AddressSection = ({ formik }: AddressSectionProps) => {
             {...formik.getFieldProps('address.postalCode')}
           />
           {formik.touched.address?.postalCode && formik.errors.address?.postalCode && (
-            <div className="error">{formik.errors.address.postalCode}</div>
+            <ErrorMessage>{formik.errors.address.postalCode}</ErrorMessage>
           )}
         </InputGroup>
         <InputGroup>

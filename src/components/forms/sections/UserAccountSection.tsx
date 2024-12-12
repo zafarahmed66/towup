@@ -1,4 +1,4 @@
-import { FormSection, FormGroupTitle, InputGroup, Label, Input } from '../StyledFormComponents';
+import { FormSection, FormGroupTitle, InputGroup, Label, Input, ErrorMessage } from '../StyledFormComponents';
 import { FormikFleetOwnerType, FormikRepoCompanyType } from '../types';
 
 interface UserAccountSectionProps {
@@ -16,7 +16,7 @@ const UserAccountSection = ({ formik }: UserAccountSectionProps) => {
           {...formik.getFieldProps('user.fullname')}
         />
         {formik.touched.user?.fullname && formik.errors.user?.fullname && (
-          <div className="error">{formik.errors.user.fullname}</div>
+          <ErrorMessage>{formik.errors.user.fullname}</ErrorMessage>
         )}
       </InputGroup>
       <InputGroup>
@@ -27,7 +27,7 @@ const UserAccountSection = ({ formik }: UserAccountSectionProps) => {
           {...formik.getFieldProps('user.email')}
         />
         {formik.touched.user?.email && formik.errors.user?.email && (
-          <div className="error">{formik.errors.user.email}</div>
+          <ErrorMessage>{formik.errors.user.email}</ErrorMessage>
         )}
       </InputGroup>
       <InputGroup>
@@ -38,7 +38,7 @@ const UserAccountSection = ({ formik }: UserAccountSectionProps) => {
           {...formik.getFieldProps('user.password')}
         />
         {formik.touched.user?.password && formik.errors.user?.password && (
-          <div className="error">{formik.errors.user.password}</div>
+          <ErrorMessage>{formik.errors.user.password}</ErrorMessage>
         )}
       </InputGroup>
     </FormSection>
