@@ -22,7 +22,7 @@ export async function signUpAsRepoCompany(form: any) {
 
 export async function signIn(form: any) {
   try {
-    const response = await axios.post('/api/auth/login', form);
+    const response = await axios.post('/auth/login', form);
     const { data } = response
     return data
   } catch (error) {

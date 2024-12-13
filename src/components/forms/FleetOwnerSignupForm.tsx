@@ -30,7 +30,6 @@ const FleetOwnerSignupForm = () => {
         email: '',
         password: '',
         confirmPassword: '',
-        phoneNumber: '',
         appNotificationSetting: {
           emailNotificationEnabled: true,
           smsNotificationEnabled: false,
@@ -46,19 +45,19 @@ const FleetOwnerSignupForm = () => {
     validationSchema: fleetOwnerValidationSchema,
     onSubmit: async (values) => {
       try {
-        let forms = {...values, user: {...values.user, phoneNumber: values.phoneNumber }};
+        let forms = {...values};
+        delete forms.user.confirmPassword
         if(!forms.telematicSettings.telematicProvider) delete forms.telematicSettings.telematicProvider
         const response = await signUpAsFleetOwner(forms)
-        if (response) {
+        if (response?.fleetOwnerDTO && response?.userDTO) {
+          toast.success("You've successfully signed up!")
           navigate('/login?signup=success');
         } else {
-          // const errorMessage = data.message || 'An error occurred during signup';
-          // formik.setErrors(data.errors || {});
-          // alert(errorMessage);
+          toast.error('An error occurred during signup. Please try again.');
         }
-      } catch (error) {
+      } catch (error: any) {
         console.error('Signup error:', error);
-        toast.error('An error occurred during signup. Please try again.');
+        toast.error(error.message);
       }
     },
   });

@@ -15,7 +15,7 @@ interface BaseFormValues {
     fullname: string;
     email: string;
     password: string;
-    confirmPassword: string;
+    confirmPassword?: string;
     phoneNumber?: string;
     appNotificationSetting: {
       emailNotificationEnabled: boolean;

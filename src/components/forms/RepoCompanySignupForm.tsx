@@ -46,7 +46,6 @@ const RepoCompanySignupForm = () => {
         email: '',
         password: '',
         confirmPassword: '',
-        phoneNumber: '',
         appNotificationSetting: {
           emailNotificationEnabled: true,
           smsNotificationEnabled: false,
@@ -57,17 +56,18 @@ const RepoCompanySignupForm = () => {
     validationSchema,
     onSubmit: async (values) => {
       try {
-        const response = await signUpAsRepoCompany({...values, user: {...values.user, phoneNumber: values.phoneNumber }})
+        let forms = {...values};
+        delete forms.user.confirmPassword
+        const response = await signUpAsRepoCompany(forms)
 
         if (response) {
           navigate('/login?signup=success');
         } else {
-          // const error = await response.text();
-          // alert('Signup failed: ' + error);
+          toast.error('An error occurred during signup. Please try again.');
         }
-      } catch (error) {
+      } catch (error: any) {
         console.error('Signup error:', error);
-        toast.error('An error occurred during signup. Please try again.');
+        toast.error(error.message);
       }
     },
   });
