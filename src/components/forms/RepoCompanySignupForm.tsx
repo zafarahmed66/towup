@@ -58,9 +58,9 @@ const RepoCompanySignupForm = () => {
       try {
         let forms = {...values};
         delete forms.user.confirmPassword
-        const response = await signUpAsRepoCompany(forms)
-
-        if (response) {
+        const response: any = await signUpAsRepoCompany(forms)
+        if (response && response.repoCompanyId) {
+          toast.success("You've successfully created recovery company account!")
           navigate('/login?signup=success');
         } else {
           toast.error('An error occurred during signup. Please try again.');
