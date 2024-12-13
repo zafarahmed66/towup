@@ -32,3 +32,8 @@ export const fleetOwnerValidationSchema = Yup.object({
 export const repoCompanyValidationSchema = Yup.object({
   ...baseValidationSchema,
 }); 
+
+export const loginValidationSchema = Yup.object({
+  email: Yup.string().email('Invalid email').required('Email is required'),
+    password: Yup.string().required('Password is required'),
+});

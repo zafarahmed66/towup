@@ -19,3 +19,13 @@ export async function signUpAsRepoCompany(form: any) {
     throw error
   }
 }
+
+export async function signIn(form: any) {
+  try {
+    const response = await axios.post('/api/auth/login', form);
+    const { data } = response
+    return data
+  } catch (error) {
+    throw error
+  }
+}

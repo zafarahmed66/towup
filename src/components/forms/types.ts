@@ -25,6 +25,11 @@ interface BaseFormValues {
   };
 }
 
+export interface LogInFormValues {
+  email: string;
+  password: string;
+}
+
 export interface FleetOwnerFormValues extends BaseFormValues {
   operationalRegion: string;
   telematicSettings: {
