@@ -5,9 +5,12 @@ import { SignupSection, SignupContainer, Title, SubmitButton, FormSection, Input
 import { LogInFormValues } from './types';
 import { loginValidationSchema } from './validationSchemas';
 import { signIn } from '../../controller/authController'
+import useCookie from '../../hooks/useCookie';
 
 const SignInForm = () => {
     const navigate = useNavigate();
+    const [token, setToken, removeToken] = useCookie('token', '');
+    const [expiresIn, setExpiresIn, removeExpiresIn] = useCookie('expiresIn', '');
 
     const formik = useFormik<LogInFormValues>({
         initialValues: {
@@ -18,8 +21,13 @@ const SignInForm = () => {
         onSubmit: async (values) => {
             try {
                 const response = await signIn(values)
-
-                if (response) {
+                if (response && response.token) {
+                    toast.success("Welcome! You've signed in successfully!")
+                    if (response.token) {
+                        const expirationDays = response.expiresIn / (60 * 60 * 24);
+                        setToken('token', response.token, { expires: expirationDays, secure: true, sameSite: 'strict'})
+                        setExpiresIn('expiresIn', response.expiresIn, { expires: expirationDays, secure: true, sameSite: 'strict' });
+                      }
                     navigate('/');
                 } else {
                     // const error = await response.text();
