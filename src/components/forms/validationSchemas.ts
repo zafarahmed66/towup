@@ -25,7 +25,7 @@ export const fleetOwnerValidationSchema = Yup.object({
   operationalRegion: Yup.string().required('Operational region is required'),
   telematicSettings: Yup.object({
     telematicProvider: Yup.string().optional(),
-    telematicApiKey: Yup.string().required('API key is required'),
+    telematicApiKey: Yup.string().optional(),
   }),
 });
 

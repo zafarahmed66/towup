@@ -47,8 +47,8 @@ const FleetOwnerSignupForm = () => {
       try {
         let forms = {...values};
         delete forms.user.confirmPassword
-        if(!forms.telematicSettings.telematicProvider) delete forms.telematicSettings.telematicProvider
-        const response = await signUpAsFleetOwner(forms)
+        if(!forms.telematicSettings?.telematicProvider || !forms.telematicSettings?.telematicApiKey) delete forms.telematicSettings
+        const response: any = await signUpAsFleetOwner(forms)
         if (response?.fleetOwnerDTO && response?.userDTO) {
           toast.success("You've successfully signed up!")
           navigate('/login?signup=success');
