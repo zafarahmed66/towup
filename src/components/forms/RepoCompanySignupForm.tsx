@@ -1,6 +1,8 @@
 import { useFormik } from 'formik';
 import * as Yup from 'yup';
 import { useNavigate } from 'react-router-dom';
+import { toast } from 'react-toastify';
+
 import CompanyBasicInfo from './sections/CompanyBasicInfo';
 import AddressSection from './sections/AddressSection';
 import UserAccountSection from './sections/UserAccountSection';
@@ -65,7 +67,7 @@ const RepoCompanySignupForm = () => {
         }
       } catch (error) {
         console.error('Signup error:', error);
-        alert('An error occurred during signup. Please try again.');
+        toast.error('An error occurred during signup. Please try again.');
       }
     },
   });

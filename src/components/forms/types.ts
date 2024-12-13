@@ -33,8 +33,8 @@ export interface LogInFormValues {
 export interface FleetOwnerFormValues extends BaseFormValues {
   operationalRegion: string;
   telematicSettings: {
-    telematicProvider: string;
-    telematicApiKey: string;
+    telematicProvider?: string;
+    telematicApiKey?: string;
   };
 }
 

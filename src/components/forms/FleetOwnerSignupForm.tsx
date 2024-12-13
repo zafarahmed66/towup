@@ -1,5 +1,7 @@
 import { useFormik } from 'formik';
 import { useNavigate } from 'react-router-dom';
+import { toast } from 'react-toastify';
+
 import CompanyBasicInfo from './sections/CompanyBasicInfo';
 import AddressSection from './sections/AddressSection';
 import UserAccountSection from './sections/UserAccountSection';
@@ -44,7 +46,9 @@ const FleetOwnerSignupForm = () => {
     validationSchema: fleetOwnerValidationSchema,
     onSubmit: async (values) => {
       try {
-        const response = await signUpAsFleetOwner({...values, user: {...values.user, phoneNumber: values.phoneNumber }})
+        let forms = {...values, user: {...values.user, phoneNumber: values.phoneNumber }};
+        if(!forms.telematicSettings.telematicProvider) delete forms.telematicSettings.telematicProvider
+        const response = await signUpAsFleetOwner(forms)
         if (response) {
           navigate('/login?signup=success');
         } else {
@@ -54,7 +58,7 @@ const FleetOwnerSignupForm = () => {
         }
       } catch (error) {
         console.error('Signup error:', error);
-        alert('An error occurred during signup. Please try again.');
+        toast.error('An error occurred during signup. Please try again.');
       }
     },
   });

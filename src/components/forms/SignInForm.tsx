@@ -1,5 +1,6 @@
 import { useFormik } from 'formik';
 import { useNavigate } from 'react-router-dom';
+import { toast } from 'react-toastify';
 import { SignupSection, SignupContainer, Title, SubmitButton, FormSection, InputGroup, Label, Input, ErrorMessage } from './StyledFormComponents';
 import { LogInFormValues } from './types';
 import { loginValidationSchema } from './validationSchemas';
@@ -26,7 +27,7 @@ const SignInForm = () => {
                 }
             } catch (error) {
                 console.error('LogIn error:', error);
-                alert('An error occurred during login. Please try again.');
+                toast.error('An error occurred during login. Please try again.');
             }
         },
     });
