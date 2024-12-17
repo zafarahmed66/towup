@@ -1,13 +1,15 @@
 import { useFormik } from 'formik';
 import * as Yup from 'yup';
 import { useNavigate } from 'react-router-dom';
+import { toast } from 'react-toastify';
+
 import CompanyBasicInfo from './sections/CompanyBasicInfo';
 import AddressSection from './sections/AddressSection';
 import UserAccountSection from './sections/UserAccountSection';
 import { SignupSection, SignupContainer, Title, Subtitle, SubmitButton } from './StyledFormComponents';
 import { RepoCompanyFormValues } from './types';
+import { signUpAsRepoCompany } from '../../controller/authController';
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 const validationSchema = Yup.object({
   companyName: Yup.string().required('Company name is required'),
   phoneNumber: Yup.string().required('Phone number is required'),
@@ -43,6 +45,7 @@ const RepoCompanySignupForm = () => {
         fullname: '',
         email: '',
         password: '',
+        confirmPassword: '',
         appNotificationSetting: {
           emailNotificationEnabled: true,
           smsNotificationEnabled: false,
@@ -53,23 +56,18 @@ const RepoCompanySignupForm = () => {
     validationSchema,
     onSubmit: async (values) => {
       try {
-        const response = await fetch(`${API_BASE_URL}/api/repo-companies/signup`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify(values),
-        });
-
-        if (response.ok) {
+        let forms = {...values};
+        delete forms.user.confirmPassword
+        const response: any = await signUpAsRepoCompany(forms)
+        if (response && response.repoCompanyId) {
+          toast.success("You've successfully created recovery company account!")
           navigate('/login?signup=success');
         } else {
-          const error = await response.text();
-          alert('Signup failed: ' + error);
+          toast.error('An error occurred during signup. Please try again.');
         }
-      } catch (error) {
+      } catch (error: any) {
         console.error('Signup error:', error);
-        alert('An error occurred during signup. Please try again.');
+        toast.error(error.message);
       }
     },
   });

@@ -1,6 +1,7 @@
 import styled from 'styled-components';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useState, useEffect } from 'react';
+import useCookie from '../../hooks/useCookie';
 
 const Nav = styled.nav<{ scrolled: boolean }>`
   position: fixed;
@@ -56,7 +57,10 @@ const SignUpButton = styled(Link)`
 `;
 
 const Navigation = () => {
+  const navigate = useNavigate();
   const [scrolled, setScrolled] = useState(false);
+  const [token, setToken, removeToken] = useCookie('token', '');
+  const [expiresIn, setExpiresIn, removeExpiresIn] = useCookie('expiresIn', '');
 
   useEffect(() => {
     const handleScroll = () => {
@@ -67,6 +71,13 @@ const Navigation = () => {
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
+  
+  const onLogOut = (event: any) => {
+    event.preventDefault();
+    removeToken()
+    removeExpiresIn()
+    navigate('/login')
+  }
 
   return (
     <Nav scrolled={scrolled}>
@@ -77,8 +88,13 @@ const Navigation = () => {
         <a href="#how-it-works">How it works</a>
         <a href="#repo-companies">Tow Trucks</a>
         <a href="#faqs">FAQs</a>
-        <Link to="/login">Login</Link>
-        <SignUpButton to="/signup">Sign Up</SignUpButton>
+        {
+          token ? <a href="#" onClick={onLogOut}>Logout</a> : 
+          <>
+            <Link to="/login">Login</Link>
+            <SignUpButton to="/signup">Sign Up</SignUpButton>
+          </>
+        }
       </NavLinks>
     </Nav>
   );

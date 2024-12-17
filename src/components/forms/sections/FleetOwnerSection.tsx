@@ -1,4 +1,4 @@
-import { FormSection, FormGroupTitle, InputGroup, Label, Select, Input } from '../StyledFormComponents';
+import { FormSection, FormGroupTitle, InputGroup, Label, Select, Input, ErrorMessage } from '../StyledFormComponents';
 import { FormikFleetOwnerType } from '../types';
 
 interface FleetOwnerSectionProps {
@@ -20,6 +20,9 @@ const FleetOwnerSection = ({ formik }: FleetOwnerSectionProps) => {
           <option value="LOS_ANGELES">Los Angeles</option>
           <option value="CHICAGO">Chicago</option>
         </Select>
+        {formik.touched.operationalRegion && formik.errors.operationalRegion && (
+          <ErrorMessage>{formik.errors.operationalRegion}</ErrorMessage>
+        )}
       </InputGroup>
       <InputGroup>
         <Label htmlFor="telematicSettings.telematicProvider">Telematic Provider</Label>
@@ -31,6 +34,7 @@ const FleetOwnerSection = ({ formik }: FleetOwnerSectionProps) => {
           <option value="SMARTCAR">Smartcar</option>
           <option value="GEOTAB">Geotab</option>
           <option value="SAMSARA">Samsara</option>
+          <option value="TEST">Test</option>
         </Select>
       </InputGroup>
       <InputGroup>
