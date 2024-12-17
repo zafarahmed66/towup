@@ -13,7 +13,10 @@ const baseValidationSchema = {
   user: Yup.object({
     fullname: Yup.string().required('Full name is required'),
     email: Yup.string().email('Invalid email').required('Email is required'),
-    password: Yup.string().min(8, 'Password must be at least 8 characters').required('Password is required'),
+    password: Yup.string().min(12, 'Password must be at least 12 characters')
+      .matches(/[A-Z]/, 'Password must contain at least one uppercase letter')
+      .matches(/\d/, 'Password must contain at least one number')
+      .required('Password is required'),
     confirmPassword: Yup.string()
       .oneOf([Yup.ref('password')], 'Passwords must match')
       .required('Confirm Password is required'),
@@ -31,9 +34,9 @@ export const fleetOwnerValidationSchema = Yup.object({
 
 export const repoCompanyValidationSchema = Yup.object({
   ...baseValidationSchema,
-}); 
+});
 
 export const loginValidationSchema = Yup.object({
   email: Yup.string().email('Invalid email').required('Email is required'),
-    password: Yup.string().required('Password is required'),
+  password: Yup.string().required('Password is required'),
 });
