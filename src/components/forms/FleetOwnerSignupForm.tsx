@@ -1,5 +1,7 @@
 import { useFormik } from 'formik';
 import { useNavigate } from 'react-router-dom';
+import { toast } from 'react-toastify';
+
 import CompanyBasicInfo from './sections/CompanyBasicInfo';
 import AddressSection from './sections/AddressSection';
 import UserAccountSection from './sections/UserAccountSection';
@@ -7,8 +9,8 @@ import FleetOwnerSection from './sections/FleetOwnerSection';
 import { SignupSection, SignupContainer, Title, Subtitle, SubmitButton } from './StyledFormComponents';
 import { FleetOwnerFormValues } from './types';
 import { fleetOwnerValidationSchema } from './validationSchemas';
+import { signUpAsFleetOwner } from '../../controller/authController'
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 const FleetOwnerSignupForm = () => {
   const navigate = useNavigate();
 
@@ -27,6 +29,7 @@ const FleetOwnerSignupForm = () => {
         fullname: '',
         email: '',
         password: '',
+        confirmPassword: '',
         appNotificationSetting: {
           emailNotificationEnabled: true,
           smsNotificationEnabled: false,
@@ -42,26 +45,19 @@ const FleetOwnerSignupForm = () => {
     validationSchema: fleetOwnerValidationSchema,
     onSubmit: async (values) => {
       try {
-        const response = await fetch(`${API_BASE_URL}/api/fleetowners/signup`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify(values),
-        });
-
-        const data = await response.json();
-
-        if (response.ok) {
+        let forms = {...values};
+        delete forms.user.confirmPassword
+        if(!forms.telematicSettings?.telematicProvider || !forms.telematicSettings?.telematicApiKey) delete forms.telematicSettings
+        const response: any = await signUpAsFleetOwner(forms)
+        if (response?.fleetOwnerDTO && response?.userDTO) {
+          toast.success("You've successfully signed up!")
           navigate('/login?signup=success');
         } else {
-          const errorMessage = data.message || 'An error occurred during signup';
-          formik.setErrors(data.errors || {});
-          alert(errorMessage);
+          toast.error('An error occurred during signup. Please try again.');
         }
-      } catch (error) {
+      } catch (error: any) {
         console.error('Signup error:', error);
-        alert('An error occurred during signup. Please try again.');
+        toast.error(error.message);
       }
     },
   });
