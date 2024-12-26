@@ -1,4 +1,4 @@
-import SignInForm from "../components/forms/SignInForm";
+import SignInForm from "../components/forms/signin/SignInForm";
 import { GlobalStyle, Logo, MainContent, Navigation, NavLinks, PageWrapper } from "../components/layout/Global";
 
 const LoginPage = () => {
