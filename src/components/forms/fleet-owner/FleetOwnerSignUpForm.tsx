@@ -164,12 +164,11 @@ export default function FleetOwnerSignupPage() {
       },
     };
 
-    console.log(data);
 
     try {
       await apiClient.post("/api/fleetowners/signup", data);
       toast.success("Sign up successful");
-      navigate("/login")
+      navigate("/login");
     } catch (error) {
       if (error instanceof AxiosError) {
         toast.error(error.response?.data.message);
@@ -732,11 +731,6 @@ export default function FleetOwnerSignupPage() {
               <Link to="/login" className="text-[#3b5998] hover:underline">
                 Log in
               </Link>
-            </p>
-
-            <p className="text-sm text-gray-600 mt-2">
-              <a href="/signup?type=repo">Sign up as a Repo Company</a> or
-              <a href="/signup?type=operator"> Tow Truck Operator</a>.
             </p>
           </div>
         </CardContent>

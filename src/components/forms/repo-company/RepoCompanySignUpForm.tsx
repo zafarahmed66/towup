@@ -1,9 +1,11 @@
 import { useState } from "react";
+import { z } from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useForm } from "react-hook-form";
+
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Checkbox } from "@/components/ui/checkbox";
 import { Switch } from "@/components/ui/switch";
 import {
   User,
@@ -11,35 +13,152 @@ import {
   Phone,
   Lock,
   Building2,
-  MapPin,
-  FileText,
-  Calendar,
   Bell,
+  MapPinHouse,
+  FlagTriangleRight,
+  MapIcon,
+  MapPinned,
 } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
+import { Form, FormField, FormLabel, FormMessage } from "@/components/ui/form";
+import apiClient from "@/controller/axiosController";
+import { toast } from "react-toastify";
+import { AxiosError } from "axios";
 
-export default function RepoCompanySignupPage() {
-  const navigate = useNavigate();
+const formSchema = z.object({
+  companyName: z
+    .string()
+    .min(2, {
+      message: "Company Name is required.",
+    })
+    .max(500, {
+      message: "Company Name cannot be more than 500 characters",
+    }),
+  companyPhone: z
+    .string()
+    .min(10, {
+      message: "Phone number should be 10 digit",
+    })
+    .max(10, {
+      message: "Phone number cannot be more than 10 character",
+    }),
+  street: z.string().min(2, {
+    message: "Street address is required",
+  }),
+  city: z.string().min(2, {
+    message: "City address is required",
+  }),
+  state: z.string().min(2, {
+    message: "State address is required",
+  }),
+  country: z.string().min(2, {
+    message: "Country name is required",
+  }),
+  postalCode: z.string().min(2, {
+    message: "Postal Code is required",
+  }),
+  fullName: z.string().min(2, {
+    message: "User fullname is required",
+  }),
+  email: z.string().email(),
+  password: z.string().min(6, {
+    message: "Password should be at least 6 character",
+  }),
+  emailNotification: z.boolean().default(true),
+  smsNotification: z.boolean().default(true),
+  pushNotification: z.boolean().default(true),
+});
+
+export default function RepoCompanySignUpForm() {
   const [step, setStep] = useState(1);
-  const [documentHasExpiration, setDocumentHasExpiration] = useState<boolean[]>(
-    [false]
-  );
-  const [useCompanyEmail, setUseCompanyEmail] = useState(false);
-  const [useCompanyPhone, setUseCompanyPhone] = useState(false);
-  const [companyEmail, setCompanyEmail] = useState("");
-  const [companyPhone, setCompanyPhone] = useState("");
-  const [notifications, setNotifications] = useState({
-    email: true,
-    sms: true,
-    push: true,
+
+  const form = useForm<z.infer<typeof formSchema>>({
+    resolver: zodResolver(formSchema),
+    defaultValues: {
+      companyName: "",
+      companyPhone: "",
+      state: "",
+      street: "",
+      city: "",
+      postalCode: "",
+      country: "",
+      fullName: "",
+      password: "",
+      email: "",
+      emailNotification: true,
+      smsNotification: true,
+      pushNotification: true,
+    },
   });
+
+  const navigate = useNavigate();
 
   const nextStep = () => setStep(step + 1);
   const prevStep = () => setStep(step - 1);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  async function onSubmit(values: z.infer<typeof formSchema>) {
+    const {
+      city,
+      companyName,
+      companyPhone,
+      country,
+      email,
+      emailNotification,
+      fullName,
+      password,
+      postalCode,
+      pushNotification,
+      smsNotification,
+      state,
+      street,
+    } = values;
+
+    const data = {
+      companyName,
+      phoneNumber: companyPhone,
+      address: {
+        street,
+        city,
+        state,
+        postalCode,
+        country,
+      },
+      user: {
+        email,
+        fullname: fullName,
+        password,
+        appNotificationSetting: {
+          emailNotificationEnabled: emailNotification,
+          smsNotificationEnabled: smsNotification,
+          appNotificationEnabled: pushNotification,
+        },
+      },
+    };
+
+
+    try {
+      await apiClient.post("/api/repo-companies/signup", data);
+      toast.success("Sign up successful");
+      navigate("/login");
+    } catch (error) {
+      if (error instanceof AxiosError) {
+        toast.error(error.response?.data.message);
+      } else {
+        toast.error("Something went wrong!");
+      }
+    }
+  }
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    navigate("/signup-confirmation");
+    const isValid = await form.trigger();
+
+    if (isValid) {
+      form.handleSubmit(onSubmit)(e);
+    } else {
+      console.log(form.getValues());
+      toast.error("Please, ensure all fields are valid");
+    }
   };
 
   return (
@@ -51,359 +170,397 @@ export default function RepoCompanySignupPage() {
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <form onSubmit={handleSubmit} className="space-y-4">
-            {step === 1 && (
-              <>
-                <h3 className="text-lg font-semibold text-[#2B4380] mb-4">
-                  Company Information
-                </h3>
-                <div className="space-y-2">
-                  <Label htmlFor="company" className="flex items-center gap-2">
-                    <Building2 className="h-4 w-4 text-[#3b5998]" />
-                    Company Name
-                  </Label>
-                  <Input id="company" placeholder="Repo Company Inc" required />
-                </div>
-                <div className="space-y-2">
-                  <Label
-                    htmlFor="companyEmail"
-                    className="flex items-center gap-2"
-                  >
-                    <Mail className="h-4 w-4 text-[#3b5998]" />
-                    Company Email
-                  </Label>
-                  <Input
-                    id="companyEmail"
-                    type="email"
-                    placeholder="contact@repocompany.com"
-                    required
-                    onChange={(e) => setCompanyEmail(e.target.value)}
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label
-                    htmlFor="companyPhone"
-                    className="flex items-center gap-2"
-                  >
-                    <Phone className="h-4 w-4 text-[#3b5998]" />
-                    Company Phone
-                  </Label>
-                  <Input
-                    id="companyPhone"
-                    type="tel"
-                    placeholder="(555) 987-6543"
-                    required
-                    onChange={(e) => setCompanyPhone(e.target.value)}
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="address" className="flex items-center gap-2">
-                    <MapPin className="h-4 w-4 text-[#3b5998]" />
-                    Company Address
-                  </Label>
-                  <Input
-                    id="address"
-                    placeholder="456 Repo Street, Anytown, USA 12345"
-                    required
-                  />
-                </div>
-                <Button
-                  type="button"
-                  onClick={nextStep}
-                  className="w-full bg-[#3b5998] hover:bg-[#344e86] text-white"
-                >
-                  Next
-                </Button>
-              </>
-            )}
-            {step === 2 && (
-              <>
-                <h3 className="text-lg font-semibold text-[#2B4380] mb-4">
-                  Account Information
-                </h3>
-                <div className="space-y-2">
-                  <Label htmlFor="name" className="flex items-center gap-2">
-                    <User className="h-4 w-4 text-[#3b5998]" />
-                    Full Name
-                  </Label>
-                  <Input id="name" placeholder="John Doe" required />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="email" className="flex items-center gap-2">
-                    <Mail className="h-4 w-4 text-[#3b5998]" />
-                    Email
-                  </Label>
-                  <div className="flex items-center space-x-2 mb-2">
-                    <Checkbox
-                      id="useCompanyEmail"
-                      checked={useCompanyEmail}
-                      onCheckedChange={(checked) =>
-                        setUseCompanyEmail(checked as boolean)
-                      }
-                    />
-                    <label
-                      htmlFor="useCompanyEmail"
-                      className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-                    >
-                      Use company email
-                    </label>
-                  </div>
-                  <Input
-                    id="email"
-                    type="email"
-                    placeholder="john@example.com"
-                    required
-                    disabled={useCompanyEmail}
-                    value={useCompanyEmail ? companyEmail : undefined}
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="phone" className="flex items-center gap-2">
-                    <Phone className="h-4 w-4 text-[#3b5998]" />
-                    Phone Number
-                  </Label>
-                  <div className="flex items-center space-x-2 mb-2">
-                    <Checkbox
-                      id="useCompanyPhone"
-                      checked={useCompanyPhone}
-                      onCheckedChange={(checked) =>
-                        setUseCompanyPhone(checked as boolean)
-                      }
-                    />
-                    <label
-                      htmlFor="useCompanyPhone"
-                      className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-                    >
-                      Use company phone
-                    </label>
-                  </div>
-                  <Input
-                    id="phone"
-                    type="tel"
-                    placeholder="(555) 123-4567"
-                    required
-                    disabled={useCompanyPhone}
-                    value={useCompanyPhone ? companyPhone : undefined}
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="password" className="flex items-center gap-2">
-                    <Lock className="h-4 w-4 text-[#3b5998]" />
-                    Password
-                  </Label>
-                  <Input
-                    id="password"
-                    type="password"
-                    placeholder="Enter your password"
-                    required
-                  />
-                </div>
-                <div className="flex flex-col sm:flex-row sm:space-x-2 space-y-2 sm:space-y-0">
-                  <Button
-                    type="button"
-                    onClick={prevStep}
-                    className="w-1/2 bg-gray-300 hover:bg-gray-400 text-gray-800"
-                  >
-                    Back
-                  </Button>
-                  <Button
-                    type="button"
-                    onClick={nextStep}
-                    className="w-1/2 bg-[#3b5998] hover:bg-[#344e86] text-white"
-                  >
-                    Next
-                  </Button>
-                </div>
-              </>
-            )}
-            {step === 3 && (
-              <>
-                <h3 className="text-lg font-semibold text-[#2B4380] mb-4">
-                  Official Documents
-                </h3>
-                {documentHasExpiration.map((hasExpiration, index) => (
-                  <div key={index} className="space-y-4 mb-4">
-                    <div className="space-y-2">
-                      <Label
-                        htmlFor={`documentName${index}`}
-                        className="flex items-center gap-2"
-                      >
-                        <FileText className="h-4 w-4 text-[#3b5998]" />
-                        Document Name
-                      </Label>
-                      <Input
-                        id={`documentName${index}`}
-                        placeholder="Enter document name"
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label
-                        htmlFor={`documentFile${index}`}
-                        className="flex items-center gap-2"
-                      >
-                        <FileText className="h-4 w-4 text-[#3b5998]" />
-                        Upload Document
-                      </Label>
-                      <Input id={`documentFile${index}`} type="file" />
-                    </div>
-                    <div className="flex items-center space-x-2 mb-4">
-                      <Checkbox
-                        id={`hasExpiration${index}`}
-                        checked={hasExpiration}
-                        onCheckedChange={(checked) => {
-                          const newDocumentHasExpiration = [
-                            ...documentHasExpiration,
-                          ];
-                          newDocumentHasExpiration[index] = checked as boolean;
-                          setDocumentHasExpiration(newDocumentHasExpiration);
-                        }}
-                      />
-                      <label
-                        htmlFor={`hasExpiration${index}`}
-                        className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-                      >
-                        Document has expiration date
-                      </label>
-                    </div>
-                    {hasExpiration && (
+          <Form {...form}>
+            <form onSubmit={handleSubmit} className="space-y-4">
+              {step === 1 && (
+                <>
+                  <h3 className="text-lg font-semibold text-[#2B4380] mb-4">
+                    Company Information
+                  </h3>
+
+                  {/* Company Name  */}
+                  <FormField
+                    control={form.control}
+                    name="companyName"
+                    render={({ field }) => (
                       <div className="space-y-2">
-                        <Label
-                          htmlFor={`expirationDate${index}`}
+                        <FormLabel
+                          htmlFor="company"
                           className="flex items-center gap-2"
                         >
-                          <Calendar className="h-4 w-4 text-[#3b5998]" />
-                          Expiration Date
-                        </Label>
-                        <Input id={`expirationDate${index}`} type="date" />
+                          <Building2 className="h-4 w-4 text-[#3b5998]" />
+                          Company Name
+                        </FormLabel>
+                        <Input
+                          id="company"
+                          placeholder="Fleet Operations Inc"
+                          {...field}
+                        />
+                        <FormMessage />
                       </div>
                     )}
+                  />
+
+                  {/* Company Phone  */}
+                  <FormField
+                    control={form.control}
+                    name="companyPhone"
+                    render={({ field }) => (
+                      <div className="space-y-2">
+                        <FormLabel
+                          htmlFor="companyPhone"
+                          className="flex items-center gap-2"
+                        >
+                          <Phone className="h-4 w-4 text-[#3b5998]" />
+                          Company Phone
+                        </FormLabel>
+                        <Input
+                          id="companyPhone"
+                          placeholder="(555) 987-6543"
+                          {...field}
+                        />
+                        <FormMessage />
+                      </div>
+                    )}
+                  />
+
+                  {/* Company Address  */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                    {/* Street Address  */}
+                    <FormField
+                      control={form.control}
+                      name="street"
+                      render={({ field }) => (
+                        <div className="space-y-2">
+                          <FormLabel
+                            htmlFor="street"
+                            className="flex items-center gap-2"
+                          >
+                            <MapPinHouse className="h-4 w-4 text-[#3b5998]" />
+                            Street Address
+                          </FormLabel>
+                          <Input
+                            id="street"
+                            placeholder="123 Fleet Street"
+                            {...field}
+                          />
+                          <FormMessage />
+                        </div>
+                      )}
+                    />
+
+                    {/* City Address  */}
+                    <FormField
+                      control={form.control}
+                      name="city"
+                      render={({ field }) => (
+                        <div className="space-y-2">
+                          <FormLabel
+                            htmlFor="city"
+                            className="flex items-center gap-2"
+                          >
+                            <Building2 className="h-4 w-4 text-[#3b5998]" />
+                            City Address
+                          </FormLabel>
+                          <Input
+                            id="City"
+                            placeholder="San Francisco"
+                            {...field}
+                          />
+                          <FormMessage />
+                        </div>
+                      )}
+                    />
                   </div>
-                ))}
-                {documentHasExpiration.length < 4 && (
-                  <Button
-                    type="button"
-                    onClick={() =>
-                      setDocumentHasExpiration([
-                        ...documentHasExpiration,
-                        false,
-                      ])
-                    }
-                    className="w-full bg-[#3b5998] hover:bg-[#344e86] text-white"
-                  >
-                    Add Another Document
-                  </Button>
-                )}
-                <div className="flex flex-col sm:flex-row sm:space-x-2 space-y-2 sm:space-y-0">
-                  <Button
-                    type="button"
-                    onClick={prevStep}
-                    className="w-1/2 bg-gray-300 hover:bg-gray-400 text-gray-800"
-                  >
-                    Back
-                  </Button>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                    {/* Country  */}
+                    <FormField
+                      control={form.control}
+                      name="country"
+                      render={({ field }) => (
+                        <div className="space-y-2">
+                          <FormLabel
+                            htmlFor="country"
+                            className="flex items-center gap-2"
+                          >
+                            <FlagTriangleRight className="h-4 w-4 text-[#3b5998]" />
+                            Country Address
+                          </FormLabel>
+                          <Input
+                            id="country"
+                            placeholder="United States"
+                            {...field}
+                          />
+                          <FormMessage />
+                        </div>
+                      )}
+                    />
+
+                    {/* Postal Code  */}
+                    <FormField
+                      control={form.control}
+                      name="postalCode"
+                      render={({ field }) => (
+                        <div className="space-y-2">
+                          <FormLabel
+                            htmlFor="postalCode"
+                            className="flex items-center gap-2"
+                          >
+                            <MapIcon className="h-4 w-4 text-[#3b5998]" />
+                            Postal Code
+                          </FormLabel>
+                          <Input
+                            id="postalCode"
+                            placeholder="94105"
+                            {...field}
+                          />
+                          <FormMessage />
+                        </div>
+                      )}
+                    />
+                  </div>
+
+                  {/* State Address */}
+                  <FormField
+                    control={form.control}
+                    name="state"
+                    render={({ field }) => (
+                      <div className="space-y-2">
+                        <FormLabel
+                          htmlFor="state"
+                          className="flex items-center gap-2"
+                        >
+                          <MapPinned className="h-4 w-4 text-[#3b5998]" />
+                          State Address
+                        </FormLabel>
+                        <Input
+                          id="state"
+                          placeholder="United States"
+                          {...field}
+                        />
+                        <FormMessage />
+                      </div>
+                    )}
+                  />
+
                   <Button
                     type="button"
                     onClick={nextStep}
-                    className="w-1/2 bg-[#3b5998] hover:bg-[#344e86] text-white"
+                    className="w-full bg-[#3b5998] hover:bg-[#344e86] text-white"
                   >
                     Next
                   </Button>
-                </div>
-              </>
-            )}
-            {step === 4 && (
-              <>
-                <h3 className="text-lg font-semibold text-[#2B4380] mb-4">
-                  Configure Notifications
-                </h3>
-                <div className="space-y-4">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center space-x-2">
-                      <Bell className="h-4 w-4 text-[#3b5998]" />
-                      <Label
-                        htmlFor="emailNotifications"
-                        className="text-sm font-medium"
-                      >
-                        Email Notifications
-                      </Label>
-                    </div>
-                    <Switch
-                      id="emailNotifications"
-                      checked={notifications.email}
-                      onCheckedChange={(checked) =>
-                        setNotifications((prev) => ({
-                          ...prev,
-                          email: checked,
-                        }))
-                      }
+                </>
+              )}
+              {step === 2 && (
+                <>
+                  <h3 className="text-lg font-semibold text-[#2B4380] mb-4">
+                    Account Information
+                  </h3>
+                  {/* Full Name  */}
+                  <FormField
+                    control={form.control}
+                    name="fullName"
+                    render={({ field }) => (
+                      <div className="space-y-2">
+                        <FormLabel
+                          htmlFor="fullName"
+                          className="flex items-center gap-2"
+                        >
+                          <User className="h-4 w-4 text-[#3b5998]" />
+                          Full Name
+                        </FormLabel>
+                        <Input
+                          id="fullName"
+                          placeholder="John Doe"
+                          {...field}
+                        />
+                        <FormMessage />
+                      </div>
+                    )}
+                  />
+
+                  {/* Email  */}
+                  <FormField
+                    control={form.control}
+                    name="email"
+                    render={({ field }) => (
+                      <div className="space-y-2">
+                        <FormLabel
+                          htmlFor="email"
+                          className="flex items-center gap-2"
+                        >
+                          <Mail className="h-4 w-4 text-[#3b5998]" />
+                          Email
+                        </FormLabel>
+
+                        <Input
+                          id="email"
+                          placeholder="john@gmail.com"
+                          {...field}
+                        />
+                        <FormMessage />
+                      </div>
+                    )}
+                  />
+
+                  {/* Password  */}
+                  <FormField
+                    control={form.control}
+                    name="password"
+                    render={({ field }) => (
+                      <div className="space-y-2">
+                        <FormLabel
+                          htmlFor="password"
+                          className="flex items-center gap-2"
+                        >
+                          <Lock className="h-4 w-4 text-[#3b5998]" />
+                          Password
+                        </FormLabel>
+                        <Input
+                          id="password"
+                          type="password"
+                          placeholder="******"
+                          {...field}
+                        />
+                        <FormMessage />
+                      </div>
+                    )}
+                  />
+
+                  <div className="flex flex-col sm:flex-row sm:space-x-2 space-y-2 sm:space-y-0">
+                    <Button
+                      type="button"
+                      onClick={prevStep}
+                      className="w-1/2 bg-gray-300 hover:bg-gray-400 text-gray-800"
+                    >
+                      Back
+                    </Button>
+                    <Button
+                      type="button"
+                      onClick={nextStep}
+                      className="w-1/2 bg-[#3b5998] hover:bg-[#344e86] text-white"
+                    >
+                      Next
+                    </Button>
+                  </div>
+                </>
+              )}
+
+              {step === 3 && (
+                <>
+                  <h3 className="text-lg font-semibold text-[#2B4380] mb-4">
+                    Configure Notifications
+                  </h3>
+                  <div className="space-y-4">
+                    {/* Email Notification  */}
+                    <FormField
+                      control={form.control}
+                      name="emailNotification"
+                      render={() => (
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center space-x-2">
+                            <Bell className="h-4 w-4 text-[#3b5998]" />
+                            <FormLabel
+                              htmlFor="emailNotification"
+                              className="text-sm font-medium"
+                            >
+                              Email Notifications
+                            </FormLabel>
+                          </div>
+                          <Switch
+                            id="emailNotification"
+                            checked={form.getValues("emailNotification")}
+                            onCheckedChange={(checked) =>
+                              form.setValue("emailNotification", checked)
+                            }
+                          />
+                          <FormMessage />
+                        </div>
+                      )}
+                    />
+
+                    {/* SMS Notification  */}
+                    <FormField
+                      control={form.control}
+                      name="smsNotification"
+                      render={() => (
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center space-x-2">
+                            <Bell className="h-4 w-4 text-[#3b5998]" />
+                            <FormLabel
+                              htmlFor="smsNotification"
+                              className="text-sm font-medium"
+                            >
+                              SMS Notifications
+                            </FormLabel>
+                          </div>
+                          <Switch
+                            id="smsNotification"
+                            checked={form.getValues("smsNotification")}
+                            onCheckedChange={(checked) =>
+                              form.setValue("smsNotification", checked)
+                            }
+                          />
+                          <FormMessage />
+                        </div>
+                      )}
+                    />
+
+                    {/* Push Notification  */}
+                    <FormField
+                      control={form.control}
+                      name="pushNotification"
+                      render={() => (
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center space-x-2">
+                            <Bell className="h-4 w-4 text-[#3b5998]" />
+                            <FormLabel
+                              htmlFor="pushNotification"
+                              className="text-sm font-medium"
+                            >
+                              SMS Notifications
+                            </FormLabel>
+                          </div>
+                          <Switch
+                            id="pushNotification"
+                            checked={form.getValues("pushNotification")}
+                            onCheckedChange={(checked) =>
+                              form.setValue("pushNotification", checked)
+                            }
+                          />
+                          <FormMessage />
+                        </div>
+                      )}
                     />
                   </div>
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center space-x-2">
-                      <Bell className="h-4 w-4 text-[#3b5998]" />
-                      <Label
-                        htmlFor="smsNotifications"
-                        className="text-sm font-medium"
-                      >
-                        SMS Notifications
-                      </Label>
-                    </div>
-                    <Switch
-                      id="smsNotifications"
-                      checked={notifications.sms}
-                      onCheckedChange={(checked) =>
-                        setNotifications((prev) => ({ ...prev, sms: checked }))
-                      }
-                    />
+                  <div className="flex flex-col sm:flex-row sm:space-x-2 space-y-2 sm:space-y-0">
+                    <Button
+                      type="button"
+                      onClick={prevStep}
+                      className="w-1/2 bg-gray-300 hover:bg-gray-400 text-gray-800"
+                    >
+                      Back
+                    </Button>
+                    <Button
+                      type="submit"
+                      className="w-1/2 bg-[#3b5998] hover:bg-[#344e86] text-white"
+                    >
+                      Complete Signup
+                    </Button>
                   </div>
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center space-x-2">
-                      <Bell className="h-4 w-4 text-[#3b5998]" />
-                      <Label
-                        htmlFor="pushNotifications"
-                        className="text-sm font-medium"
-                      >
-                        Push Notifications
-                      </Label>
-                    </div>
-                    <Switch
-                      id="pushNotifications"
-                      checked={notifications.push}
-                      onCheckedChange={(checked) =>
-                        setNotifications((prev) => ({ ...prev, push: checked }))
-                      }
-                    />
-                  </div>
-                </div>
-                <div className="flex flex-col sm:flex-row sm:space-x-2 space-y-2 sm:space-y-0">
-                  <Button
-                    type="button"
-                    onClick={prevStep}
-                    className="w-1/2 bg-gray-300 hover:bg-gray-400 text-gray-800"
-                  >
-                    Back
-                  </Button>
-                  <Button
-                    type="submit"
-                    className="w-1/2 bg-[#3b5998] hover:bg-[#344e86] text-white"
-                  >
-                    Complete Signup
-                  </Button>
-                </div>
-              </>
-            )}
-          </form>
+                </>
+              )}
+            </form>
+          </Form>
+
           <div className="mt-4 text-center">
             <p className="text-sm text-gray-600">
               Already have an account?{" "}
               <Link to="/login" className="text-[#3b5998] hover:underline">
                 Log in
               </Link>
-            </p>
-
-            <p className="text-sm text-gray-600 mt-2">
-              <a href="/signup?type=fleet">Sign up as a Fleet Owner</a> or
-              <a href="/signup?type=operator"> Tow Truck Operator</a>.
             </p>
           </div>
         </CardContent>
