@@ -34,58 +34,80 @@ import apiClient from "@/controller/axiosController";
 import { toast } from "react-toastify";
 import { AxiosError } from "axios";
 
-const formSchema = z.object({
-  companyName: z
-    .string()
-    .min(2, {
-      message: "Company Name is required.",
-    })
-    .max(500, {
-      message: "Company Name cannot be more than 500 characters",
+const formSchema = z
+  .object({
+    companyName: z
+      .string()
+      .min(2, {
+        message: "Company Name is required.",
+      })
+      .max(500, {
+        message: "Company Name cannot be more than 500 characters",
+      }),
+    companyPhone: z.string().regex(/^\d{10}$/, {
+      message: "Phone number should be exactly 10 digits.",
     }),
-  companyPhone: z
-    .string()
-    .min(10, {
-      message: "Phone number should be 10 digit",
-    })
-    .max(10, {
-      message: "Phone number cannot be more than 10 character",
+    street: z.string().min(2, {
+      message: "Street address is required",
     }),
-  street: z.string().min(2, {
-    message: "Street address is required",
-  }),
-  city: z.string().min(2, {
-    message: "City address is required",
-  }),
-  state: z.string().min(2, {
-    message: "State address is required",
-  }),
-  country: z.string().min(2, {
-    message: "Country name is required",
-  }),
-  postalCode: z.string().min(2, {
-    message: "Postal Code is required",
-  }),
-  fullName: z.string().min(2, {
-    message: "User fullname is required",
-  }),
-  email: z.string().email(),
-  password: z.string().min(6, {
-    message: "Password should be at least 6 character",
-  }),
-  telematicsProvider: z.string().min(2, {
-    message: "TelematicsProvider is required",
-  }),
-  apiKey: z.string().min(2, {
-    message: "API key is required",
-  }),
-  selectedRegion: z.string().min(2, {
-    message: "Region is required",
-  }),
-  emailNotification: z.boolean().default(true),
-  smsNotification: z.boolean().default(true),
-  pushNotification: z.boolean().default(true),
-});
+    city: z.string().min(2, {
+      message: "City address is required",
+    }),
+    state: z.string().min(2, {
+      message: "State address is required",
+    }),
+    country: z.string().min(2, {
+      message: "Country name is required",
+    }),
+    postalCode: z.string().min(2, {
+      message: "Postal Code is required",
+    }),
+    fullName: z.string().min(2, {
+      message: "User fullname is required",
+    }),
+    email: z.string().email(),
+    password: z
+      .string()
+      .min(12, {
+        message: "Password should be at least 12 characters long.",
+      })
+      .regex(/[a-z]/, {
+        message: "Password should contain at least one lowercase letter.",
+      })
+      .regex(/[A-Z]/, {
+        message: "Password should contain at least one uppercase letter.",
+      }),
+    confirmPassword: z
+      .string()
+      .min(12, {
+        message: "Confirm password should be at least 12 characters long.",
+      })
+      .regex(/[a-z]/, {
+        message:
+          "Confirm password should contain at least one lowercase letter.",
+      })
+      .regex(/[A-Z]/, {
+        message:
+          "Confirm password should contain at least one uppercase letter.",
+      }),
+
+    telematicsProvider: z.string().min(2, {
+      message: "TelematicsProvider is required",
+    }),
+    apiKey: z.string().min(2, {
+      message: "API key is required",
+    }),
+    selectedRegion: z.string().min(2, {
+      message: "Region is required",
+    }),
+    emailNotification: z.boolean().default(true),
+    smsNotification: z.boolean().default(true),
+    pushNotification: z.boolean().default(true),
+  })
+  .refine((data) => data.password === data.confirmPassword, {
+    message: "Passwords don't match",
+    path: ["confirmPassword"],
+  });
 
 export default function FleetOwnerSignupPage() {
   const [step, setStep] = useState(1);
@@ -94,7 +116,6 @@ export default function FleetOwnerSignupPage() {
     resolver: zodResolver(formSchema),
     defaultValues: {
       companyName: "",
-      companyPhone: "",
       state: "",
       street: "",
       city: "",
@@ -139,7 +160,7 @@ export default function FleetOwnerSignupPage() {
 
     const data = {
       companyName,
-      phoneNumber: companyPhone,
+      phoneNumber: Number(companyPhone),
       operationalRegion: selectedRegion,
       address: {
         street,
@@ -164,11 +185,14 @@ export default function FleetOwnerSignupPage() {
       },
     };
 
-
     try {
       await apiClient.post("/api/fleetowners/signup", data);
       toast.success("Sign up successful");
-      navigate("/login");
+      navigate("/signup-confirmation-page", {
+        state: {
+          email,
+        },
+      });
     } catch (error) {
       if (error instanceof AxiosError) {
         toast.error(error.response?.data.message);
@@ -245,6 +269,7 @@ export default function FleetOwnerSignupPage() {
                         </FormLabel>
                         <Input
                           id="companyPhone"
+                          type="tel"
                           placeholder="(555) 987-6543"
                           {...field}
                         />
@@ -254,7 +279,7 @@ export default function FleetOwnerSignupPage() {
                   />
 
                   {/* Company Address  */}
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                  <div className="grid grid-cols-1 gap-2 md:grid-cols-2">
                     {/* Street Address  */}
                     <FormField
                       control={form.control}
@@ -302,7 +327,7 @@ export default function FleetOwnerSignupPage() {
                     />
                   </div>
 
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                  <div className="grid grid-cols-1 gap-2 md:grid-cols-2">
                     {/* Country  */}
                     <FormField
                       control={form.control}
@@ -458,11 +483,35 @@ export default function FleetOwnerSignupPage() {
                     )}
                   />
 
-                  <div className="flex flex-col sm:flex-row sm:space-x-2 space-y-2 sm:space-y-0">
+                  {/* Confirm Password */}
+                  <FormField
+                    control={form.control}
+                    name="confirmPassword"
+                    render={({ field }) => (
+                      <div className="space-y-2">
+                        <FormLabel
+                          htmlFor="confirmPassword"
+                          className="flex items-center gap-2"
+                        >
+                          <Lock className="h-4 w-4 text-[#3b5998]" />
+                          Confirm Password
+                        </FormLabel>
+                        <Input
+                          id="confirmPassword"
+                          type="password"
+                          placeholder="******"
+                          {...field}
+                        />
+                        <FormMessage />
+                      </div>
+                    )}
+                  />
+
+                  <div className="flex flex-col space-y-2 sm:flex-row sm:space-x-2 sm:space-y-0">
                     <Button
                       type="button"
                       onClick={prevStep}
-                      className="w-1/2 bg-gray-300 hover:bg-gray-400 text-gray-800"
+                      className="w-1/2 text-gray-800 bg-gray-300 hover:bg-gray-400"
                     >
                       Back
                     </Button>
@@ -538,11 +587,11 @@ export default function FleetOwnerSignupPage() {
                     )}
                   />
 
-                  <div className="flex flex-col sm:flex-row sm:space-x-2 space-y-2 sm:space-y-0">
+                  <div className="flex flex-col space-y-2 sm:flex-row sm:space-x-2 sm:space-y-0">
                     <Button
                       type="button"
                       onClick={prevStep}
-                      className="w-1/2 bg-gray-300 hover:bg-gray-400 text-gray-800"
+                      className="w-1/2 text-gray-800 bg-gray-300 hover:bg-gray-400"
                     >
                       Back
                     </Button>
@@ -600,11 +649,11 @@ export default function FleetOwnerSignupPage() {
                       )}
                     />
                   </div>
-                  <div className="flex flex-col sm:flex-row sm:space-x-2 space-y-2 sm:space-y-0">
+                  <div className="flex flex-col space-y-2 sm:flex-row sm:space-x-2 sm:space-y-0">
                     <Button
                       type="button"
                       onClick={prevStep}
-                      className="w-1/2 bg-gray-300 hover:bg-gray-400 text-gray-800"
+                      className="w-1/2 text-gray-800 bg-gray-300 hover:bg-gray-400"
                     >
                       Back
                     </Button>
@@ -705,16 +754,17 @@ export default function FleetOwnerSignupPage() {
                       )}
                     />
                   </div>
-                  <div className="flex flex-col sm:flex-row sm:space-x-2 space-y-2 sm:space-y-0">
+                  <div className="flex flex-col space-y-2 sm:flex-row sm:space-x-2 sm:space-y-0">
                     <Button
                       type="button"
                       onClick={prevStep}
-                      className="w-1/2 bg-gray-300 hover:bg-gray-400 text-gray-800"
+                      className="w-1/2 text-gray-800 bg-gray-300 hover:bg-gray-400"
                     >
                       Back
                     </Button>
                     <Button
                       type="submit"
+                      disabled={form.formState.isSubmitting}
                       className="w-1/2 bg-[#3b5998] hover:bg-[#344e86] text-white"
                     >
                       Complete Signup

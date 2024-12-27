@@ -14,37 +14,58 @@ import apiClient from "@/controller/axiosController";
 import { toast } from "react-toastify";
 import { AxiosError } from "axios";
 
-const formSchema = z.object({
-  operatorName: z
-    .string()
-    .min(2, {
-      message: "Operator Name is required.",
-    })
-    .max(500, {
-      message: "Operator Name cannot be more than 500 characters",
+const formSchema = z
+  .object({
+    operatorName: z
+      .string()
+      .min(2, {
+        message: "Operator Name is required.",
+      })
+      .max(500, {
+        message: "Operator Name cannot be more than 500 characters",
+      }),
+    licenseNumber: z.string().min(2, {
+      message: "Liscence Number is required",
     }),
-  licenseNumber: z.string().min(2, {
-    message: "Liscence Number is required",
-  }),
-  fullName: z.string().min(2, {
-    message: "User fullname is required",
-  }),
-  email: z.string().email(),
-  password: z.string().min(6, {
-    message: "Password should be at least 6 character",
-  }),
-  phoneNumber: z
-    .string()
-    .min(10, {
-      message: "Phone number should be 10 digit",
-    })
-    .max(10, {
-      message: "Phone number cannot be more than 10 character",
+    fullName: z.string().min(2, {
+      message: "User fullname is required",
     }),
-  emailNotification: z.boolean().default(true),
-  smsNotification: z.boolean().default(true),
-  pushNotification: z.boolean().default(true),
-});
+    email: z.string().email(),
+    password: z
+      .string()
+      .min(12, {
+        message: "Password should be at least 12 characters long.",
+      })
+      .regex(/[a-z]/, {
+        message: "Password should contain at least one lowercase letter.",
+      })
+      .regex(/[A-Z]/, {
+        message: "Password should contain at least one uppercase letter.",
+      }),
+    confirmPassword: z
+      .string()
+      .min(12, {
+        message: "Confirm password should be at least 12 characters long.",
+      })
+      .regex(/[a-z]/, {
+        message:
+          "Confirm password should contain at least one lowercase letter.",
+      })
+      .regex(/[A-Z]/, {
+        message:
+          "Confirm password should contain at least one uppercase letter.",
+      }),
+    phoneNumber: z.string().regex(/^\d{10}$/, {
+      message: "Phone number should be exactly 10 digits.",
+    }),
+    emailNotification: z.boolean().default(true),
+    smsNotification: z.boolean().default(true),
+    pushNotification: z.boolean().default(true),
+  })
+  .refine((data) => data.password === data.confirmPassword, {
+    message: "Passwords don't match",
+    path: ["confirmPassword"],
+  });
 
 export default function TowTruckOperatorSignUpForm() {
   const [step, setStep] = useState(1);
@@ -297,11 +318,35 @@ export default function TowTruckOperatorSignUpForm() {
                     )}
                   />
 
-                  <div className="flex flex-col sm:flex-row sm:space-x-2 space-y-2 sm:space-y-0">
+                  {/* Confirm Password */}
+                  <FormField
+                    control={form.control}
+                    name="confirmPassword"
+                    render={({ field }) => (
+                      <div className="space-y-2">
+                        <FormLabel
+                          htmlFor="confirmPassword"
+                          className="flex items-center gap-2"
+                        >
+                          <Lock className="h-4 w-4 text-[#3b5998]" />
+                          Confirm Password
+                        </FormLabel>
+                        <Input
+                          id="confirmPassword"
+                          type="password"
+                          placeholder="******"
+                          {...field}
+                        />
+                        <FormMessage />
+                      </div>
+                    )}
+                  />
+
+                  <div className="flex flex-col space-y-2 sm:flex-row sm:space-x-2 sm:space-y-0">
                     <Button
                       type="button"
                       onClick={prevStep}
-                      className="w-1/2 bg-gray-300 hover:bg-gray-400 text-gray-800"
+                      className="w-1/2 text-gray-800 bg-gray-300 hover:bg-gray-400"
                     >
                       Back
                     </Button>
@@ -403,16 +448,17 @@ export default function TowTruckOperatorSignUpForm() {
                       )}
                     />
                   </div>
-                  <div className="flex flex-col sm:flex-row sm:space-x-2 space-y-2 sm:space-y-0">
+                  <div className="flex flex-col space-y-2 sm:flex-row sm:space-x-2 sm:space-y-0">
                     <Button
                       type="button"
                       onClick={prevStep}
-                      className="w-1/2 bg-gray-300 hover:bg-gray-400 text-gray-800"
+                      className="w-1/2 text-gray-800 bg-gray-300 hover:bg-gray-400"
                     >
                       Back
                     </Button>
                     <Button
                       type="submit"
+                      disabled={form.formState.isSubmitting}
                       className="w-1/2 bg-[#3b5998] hover:bg-[#344e86] text-white"
                     >
                       Complete Signup
