@@ -1,22 +1,32 @@
-import { useState } from 'react';
-import Cookies from 'js-cookie';
+import { useState } from "react";
+import Cookies from "js-cookie";
 
-function useCookie(key: string, defaultValue: any) {
-  const [cookie, setCookieState] = useState(() => Cookies.get(key) || defaultValue);
 
-  // Function to update the cookie
-  const setCookie = (value: any, options = {}) => {
-    Cookies.set(key, value, options);
-    setCookieState(value); // Update state
+type CookieAttributes = {
+  expires?: number | Date;
+  path?: string;
+  domain?: string;
+  secure?: boolean;
+  sameSite?: "strict" | "lax" | "none";
+};
+
+function useCookie<T = string>(key: string, defaultValue: T) {
+  const [cookie, setCookieState] = useState<T>(() => {
+    const cookieValue = Cookies.get(key);
+    return cookieValue ? (JSON.parse(cookieValue) as T) : defaultValue;
+  });
+
+  const setCookie = (value: T, options: CookieAttributes = {}) => {
+    Cookies.set(key, JSON.stringify(value), options);
+    setCookieState(value);
   };
 
-  // Function to remove the cookie
-  const removeCookie = (options = {}) => {
+  const removeCookie = (options: CookieAttributes = {}) => {
     Cookies.remove(key, options);
-    setCookieState(null); // Clear state
+    setCookieState(defaultValue);
   };
 
-  return [cookie, setCookie, removeCookie];
+  return [cookie, setCookie, removeCookie] as const;
 }
 
 export default useCookie;

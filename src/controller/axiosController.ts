@@ -39,7 +39,7 @@ api.interceptors.request.use(
 // Response Interceptor (Optional)
 api.interceptors.response.use(
   (response: AxiosResponse): any => {
-    return response.data; // Simplifies response handling
+    return response; // Simplifies response handling
   },
   (error: AxiosError): Promise<AxiosError> => {
     console.error('API Error:', error.response || error.message);
