@@ -188,7 +188,7 @@ export default function FleetOwnerSignupPage() {
     try {
       await apiClient.post("/api/fleetowners/signup", data);
       toast.success("Sign up successful");
-      navigate("/signup-confirmation-page", {
+      navigate("/signup-confirmation", {
         state: {
           email,
         },

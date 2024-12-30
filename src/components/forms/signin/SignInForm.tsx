@@ -61,7 +61,7 @@ export default function LoginPage() {
      if (error instanceof AxiosError) {
        if (error.response?.status === 403) {
          toast.error("Email not verified.");
-         navigate("/signup-confirmation-page", {
+         navigate("/signup-confirmation", {
            state: { email: values.email },
          });
        } else {

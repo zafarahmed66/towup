@@ -159,7 +159,7 @@ export default function RepoCompanySignUpForm() {
     try {
       await apiClient.post("/api/repo-companies/signup", data);
       toast.success("Sign up successful");
-      navigate("/signup-confirmation-page", {
+      navigate("/signup-confirmation", {
         state: {
           email,
         },

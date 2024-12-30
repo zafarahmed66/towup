@@ -7,6 +7,7 @@ import { GlobalStyles } from './styles/GlobalStyles';
 import 'react-toastify/dist/ReactToastify.css';
 import { ToastContainer } from 'react-toastify';
 import SignupConfirmationPage from './pages/signup/SignUpConfirmationPage';
+import EmailValidationPage from './pages/signup/EmailValidationPage';
 
 function App() {
   return (
@@ -16,7 +17,8 @@ function App() {
         <Route path="/" element={<LandingPage />} />
         <Route path="/signup" element={<SignupPage />} />
         <Route path="/login" element={<LoginPage />} />
-        <Route path="/signup-confirmation-page" element={<SignupConfirmationPage />} />
+        <Route path="/signup-confirmation" element={<SignupConfirmationPage />} />
+        <Route path="/verify-email" element={<EmailValidationPage />} />
       </Routes>
       <ToastContainer />
     </Router>
