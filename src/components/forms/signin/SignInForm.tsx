@@ -21,11 +21,13 @@ const formSchema = z.object({
 });
 
 export default function LoginPage() {
-    const [_token, setToken, _removeToken] = useCookie("token", "");
-    const [_expiresIn, setExpiresIn, _removeExpiresIn] = useCookie(
-      "expiresIn",
-      ""
-    );
+  const [_token, setToken, _removeToken] = useCookie("token", "");
+  const [_expiresIn, setExpiresIn, _removeExpiresIn] = useCookie(
+    "expiresIn",
+    ""
+  );
+  const [_userType, setUserType, _removeUserType] = useCookie("userType", "");
+  const [_userId, setUserId, _removeUserId] = useCookie("userId", "");
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -36,43 +38,52 @@ export default function LoginPage() {
 
   const navigate = useNavigate();
 
- const onSubmit = async (values: z.infer<typeof formSchema>) => {
-   try {
-     const { data } = await axiosClient.post("/auth/login", values);
-     if (data) {
-       if (data.token) {
-         const expirationDays = data.expiresIn / (60 * 60 * 24);
-         setToken(data.token, {
-           expires: expirationDays,
-           secure: true,
-           sameSite: "strict",
-         });
-         setExpiresIn(data.expiresIn, {
-           expires: expirationDays,
-           secure: true,
-           sameSite: "strict",
-         });
-         toast.success("Welcome! You've signed in successfully!");
-         navigate("/");
-       }
-     }
-   } catch (error) {
-     console.error(error);
-     if (error instanceof AxiosError) {
-       if (error.response?.status === 403) {
-         toast.error("Email not verified.");
-         navigate("/signup-confirmation", {
-           state: { email: values.email },
-         });
-       } else {
-         toast.error(error.response?.data.message || "An error occurred.");
-       }
-     } else {
-       toast.error("Something went wrong!");
-     }
-   }
- };
-
+  const onSubmit = async (values: z.infer<typeof formSchema>) => {
+    try {
+      const { data } = await axiosClient.post("/auth/login", values);
+      if (data) {
+        if (data.token) {
+          const expirationDays = data.expiresIn / (60 * 60 * 24);
+          setUserId(data.entityId, {
+            expires: expirationDays,
+            secure: true,
+            sameSite: "strict",
+          });
+          setUserType(data.userType, {
+            expires: expirationDays,
+            secure: true,
+            sameSite: "strict",
+          });
+          setToken(data.token, {
+            expires: expirationDays,
+            secure: true,
+            sameSite: "strict",
+          });
+          setExpiresIn(data.expiresIn, {
+            expires: expirationDays,
+            secure: true,
+            sameSite: "strict",
+          });
+          toast.success("Welcome! You've signed in successfully!");
+          navigate("/");
+        }
+      }
+    } catch (error) {
+      console.error(error);
+      if (error instanceof AxiosError) {
+        if (error.response?.status === 403) {
+          toast.error("Email not verified.");
+          navigate("/signup-confirmation", {
+            state: { email: values.email },
+          });
+        } else {
+          toast.error(error.response?.data.message || "An error occurred.");
+        }
+      } else {
+        toast.error("Something went wrong!");
+      }
+    }
+  };
 
   return (
     <div className="min-h-screen bg-[#2B4380] flex items-center justify-center p-4 w-screen">

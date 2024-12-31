@@ -8,6 +8,7 @@ type CookieAttributes = {
   domain?: string;
   secure?: boolean;
   sameSite?: "strict" | "lax" | "none";
+  userType?: string;
 };
 
 function useCookie<T = string>(key: string, defaultValue: T) {

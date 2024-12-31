@@ -1,4 +1,10 @@
-import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse, AxiosError } from 'axios';
+import axios, {
+  AxiosInstance,
+  AxiosRequestConfig,
+  AxiosResponse,
+  AxiosError,
+} from "axios";
+import Cookies from "js-cookie";
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
@@ -11,10 +17,10 @@ interface ApiResponse<T = any> {
 
 // Create an Axios instance with configuration
 const api: AxiosInstance = axios.create({
-  baseURL: API_BASE_URL || 'http://localhost:5437', // Default base URL
+  baseURL: API_BASE_URL || "http://localhost:5437", // Default base URL
   timeout: 5000, // Request timeout in milliseconds
   headers: {
-    'Content-Type': 'application/json',
+    "Content-Type": "application/json",
   },
 });
 
@@ -22,7 +28,8 @@ const api: AxiosInstance = axios.create({
 api.interceptors.request.use(
   (config: AxiosRequestConfig): any => {
     // Example: Add Authorization token to headers
-    const token = localStorage.getItem('auth_token');
+    const cookiesValue = Cookies.get("token");
+    const token = cookiesValue && JSON.parse(cookiesValue);
     if (token) {
       config.headers = {
         ...config.headers,
@@ -42,7 +49,7 @@ api.interceptors.response.use(
     return response; // Simplifies response handling
   },
   (error: AxiosError): Promise<AxiosError> => {
-    console.error('API Error:', error.response || error.message);
+    console.error("API Error:", error.response || error.message);
     return Promise.reject(error);
   }
 );
@@ -51,7 +58,10 @@ api.interceptors.response.use(
 export default api;
 
 // Define and export reusable API functions with types
-export const get = async <T>(url: string, config?: AxiosRequestConfig): Promise<ApiResponse<T>> => {
+export const get = async <T>(
+  url: string,
+  config?: AxiosRequestConfig
+): Promise<ApiResponse<T>> => {
   return await api.get(url, config);
 };
 
@@ -71,6 +81,9 @@ export const put = async <T>(
   return await api.put(url, data, config);
 };
 
-export const del = async <T>(url: string, config?: AxiosRequestConfig): Promise<ApiResponse<T>> => {
+export const del = async <T>(
+  url: string,
+  config?: AxiosRequestConfig
+): Promise<ApiResponse<T>> => {
   return await api.delete(url, config);
 };
