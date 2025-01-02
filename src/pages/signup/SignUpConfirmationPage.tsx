@@ -3,7 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import api from "@/controller/axiosController";
 import { AxiosError } from "axios";
 import { Mail, ArrowLeft } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Link, Navigate, useLocation } from "react-router-dom";
 import { toast } from "react-toastify";
 
@@ -14,11 +14,7 @@ export default function SignupConfirmationPage() {
 
   const email = location.state?.email || "";
 
-  useEffect(() => {
-    if (email) {
-      handleSend();
-    }
-  }, [email]);
+ 
   
   if (!email) {
     return <Navigate to={"/login"} />;
