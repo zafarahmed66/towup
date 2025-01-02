@@ -51,7 +51,7 @@ export default function EditAccountDetails() {
     resolver: zodResolver(editAccountSchema),
     defaultValues: {
       company: companyName,
-      phone: phoneNumber,
+      phone: phoneNumber.toString(),
       street,
       city,
       state: addrState,
@@ -69,12 +69,13 @@ export default function EditAccountDetails() {
         },
         companyName: data.company,
         phoneNumber: Number(data.phone),
+        operationalRegion: state.operationalRegion,
         address: {
           street: data.street,
           city: data.city,
           state: data.state,
-          country: data.country,
           postalCode: data.postalCode,
+          country: data.country,
         },
       };
 

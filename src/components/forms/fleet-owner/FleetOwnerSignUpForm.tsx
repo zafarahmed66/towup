@@ -209,7 +209,6 @@ export default function FleetOwnerSignupPage() {
     if (isValid) {
       form.handleSubmit(onSubmit)(e);
     } else {
-      console.log(form.getValues());
       toast.error("Please, ensure all fields are valid");
     }
   };

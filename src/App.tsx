@@ -13,6 +13,7 @@ import EditAccountDetails from "./pages/AccountEditPage";
 import EditUserProfile from "./pages/UserEditPage";
 import ConfigureNotifications from "./pages/AccountNotifications";
 import EditTelematicsInfo from "./pages/EditTelematicsInfo";
+import ApproveUsersPage from "./pages/ApproveUsersPage";
 
 function App() {
   return (
@@ -37,6 +38,10 @@ function App() {
         <Route
           path="/profile/notifications"
           element={<ConfigureNotifications />}
+        />
+        <Route
+          path="/approve/users"
+          element={<ApproveUsersPage />}
         />
       </Routes>
       <ToastContainer />
