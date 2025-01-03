@@ -206,8 +206,7 @@ export default function FleetOwnerSignupPage() {
     e.preventDefault();
     const isValid = await form.trigger();
 
-    if (isValid) {
-      form.handleSubmit(onSubmit)(e);
+    if (isValid) { form.handleSubmit(onSubmit)(e);
     } else {
       toast.error("Please, ensure all fields are valid");
     }

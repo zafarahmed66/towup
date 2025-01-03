@@ -1,14 +1,16 @@
 import { useState, useEffect } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { UserCheck } from "lucide-react";
+import { UserCheck, Trash } from "lucide-react";
 import api from "@/controller/axiosController";
+import { toast } from "react-toastify";
 
 export interface UserData {
-  repoCompanyId: string;
+  id: string;
   companyName: string;
   companyEmail: string;
   signupStatus: "PENDING" | "APPROVED" | "REJECTED";
+  userType: "FLEET_OWNER" | "REPO_COMPANY";
 }
 
 export default function ApproveUsersPage() {
@@ -19,8 +21,26 @@ export default function ApproveUsersPage() {
     const fetchUsers = async () => {
       try {
         setLoading(true);
-        const response = await api.get("/api/repo-companies");
-        setUsers(response.data);
+        // Fetch both Fleet Owners and Repo Companies
+        const [fleetOwnersResponse, repoCompaniesResponse] = await Promise.all([
+          api.get("/api/fleetowners"),
+          api.get("/api/repo-companies"),
+        ]);
+
+        // Combine and normalize data
+        const fleetOwners = fleetOwnersResponse.data.map((user: any) => ({
+          ...user,
+          id: user.fleetOwnerId,
+          userType: "FLEET_OWNER",
+        }));
+
+        const repoCompanies = repoCompaniesResponse.data.map((user: any) => ({
+          ...user,
+          id: user.repoCompanyId,
+          userType: "REPO_COMPANY",
+        }));
+
+        setUsers([...fleetOwners, ...repoCompanies]);
       } catch (error) {
         console.error("Failed to fetch users:", error);
       } finally {
@@ -30,24 +50,46 @@ export default function ApproveUsersPage() {
 
     fetchUsers();
   }, []);
-    
 
-  const handleApprove = async (userId: string) => {
+
+  const handleApprove = async (userId: string, userType: string) => {
     try {
-      await api.post(`/api/repo-companies/${userId}/approve`);
+      const endpoint =
+        userType === "FLEET_OWNER"
+          ? `/api/fleetowners/${userId}/approve`
+          : `/api/repo-companies/${userId}/approve`;
+
+      await api.post(endpoint);
+      toast.success("User approved");
+
+
       setUsers((prev) =>
         prev.map((user) =>
-          user.repoCompanyId === userId
-            ? { ...user, signupStatus: "APPROVED" }
-            : user
+          user.id === userId ? { ...user, signupStatus: "APPROVED" } : user
         )
       );
     } catch (error) {
+      toast.success("Failed to delete the user!");
       console.error("Failed to approve user:", error);
     }
   };
 
-  
+  const handleDelete = async (userId: string, userType: string) => {
+    try {
+      const endpoint =
+        userType === "FLEET_OWNER"
+          ? `/api/fleetowners/${userId}`
+          : `/api/repo-companies/${userId}`;
+
+      await api.delete(endpoint);
+      toast.success("User deleted!")
+      
+      setUsers((prev) => prev.filter((user) => user.id !== userId));
+    } catch (error) {
+      toast.success("Failed to delete the user!")
+      console.error("Failed to delete user:", error);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-[#2B4380] w-screen">
@@ -55,14 +97,11 @@ export default function ApproveUsersPage() {
         <h1 className="text-3xl font-bold text-white">User Approvals</h1>
         {loading && <p className="text-white">Loading users...</p>}
         {!loading && users.length === 0 && (
-          <p className="text-white">No pending users to approve.</p>
+          <p className="text-white">No pending users to approve or delete.</p>
         )}
         <div className="space-y-4">
           {users.map((user) => (
-            <Card
-              key={user.repoCompanyId}
-              className="overflow-hidden shadow-lg"
-            >
+            <Card key={user.id} className="overflow-hidden shadow-lg">
               <CardContent className="flex items-center justify-between p-6">
                 <div>
                   <h3 className="text-xl font-semibold text-[#2B4380]">
@@ -80,20 +119,32 @@ export default function ApproveUsersPage() {
                   >
                     Status: {user.signupStatus}
                   </p>
+                  <p className="text-xs text-gray-400">
+                    User Type: {user.userType}
+                  </p>
                 </div>
-                {user.signupStatus === "PENDING" && (
-                  <div className="flex gap-2">
+                <div className="flex gap-2">
+                  {user.signupStatus === "PENDING" && (
                     <Button
                       variant="outline"
                       size="sm"
                       className="text-white bg-green-500 hover:bg-green-600"
-                      onClick={() => handleApprove(user.repoCompanyId)}
+                      onClick={() => handleApprove(user.id, user.userType)}
                     >
                       <UserCheck className="w-4 h-4 mr-2" />
                       Approve
                     </Button>
-                  </div>
-                )}
+                  )}
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="text-white bg-red-500 hover:bg-red-600"
+                    onClick={() => handleDelete(user.id, user.userType)}
+                  >
+                    <Trash className="w-4 h-4 mr-2" />
+                    Delete
+                  </Button>
+                </div>
               </CardContent>
             </Card>
           ))}
