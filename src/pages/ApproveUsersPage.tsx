@@ -27,17 +27,17 @@ export default function ApproveUsersPage() {
           api.get("/api/repo-companies"),
         ]);
 
+        const repoCompanies = repoCompaniesResponse.data.map((user: any) => ({
+          ...user,
+          id: user.repoCompanyId,
+          userType: "REPO_COMPANY",
+        }));
+
         // Combine and normalize data
         const fleetOwners = fleetOwnersResponse.data.map((user: any) => ({
           ...user,
           id: user.fleetOwnerId,
           userType: "FLEET_OWNER",
-        }));
-
-        const repoCompanies = repoCompaniesResponse.data.map((user: any) => ({
-          ...user,
-          id: user.repoCompanyId,
-          userType: "REPO_COMPANY",
         }));
 
         setUsers([...fleetOwners, ...repoCompanies]);
@@ -51,6 +51,7 @@ export default function ApproveUsersPage() {
     fetchUsers();
   }, []);
 
+  console.log(users);
 
   const handleApprove = async (userId: string, userType: string) => {
     try {
@@ -61,7 +62,6 @@ export default function ApproveUsersPage() {
 
       await api.post(endpoint);
       toast.success("User approved");
-
 
       setUsers((prev) =>
         prev.map((user) =>
@@ -82,11 +82,11 @@ export default function ApproveUsersPage() {
           : `/api/repo-companies/${userId}`;
 
       await api.delete(endpoint);
-      toast.success("User deleted!")
-      
+      toast.success("User deleted!");
+
       setUsers((prev) => prev.filter((user) => user.id !== userId));
     } catch (error) {
-      toast.success("Failed to delete the user!")
+      toast.success("Failed to delete the user!");
       console.error("Failed to delete user:", error);
     }
   };

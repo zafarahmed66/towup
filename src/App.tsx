@@ -14,6 +14,7 @@ import EditUserProfile from "./pages/UserEditPage";
 import ConfigureNotifications from "./pages/AccountNotifications";
 import EditTelematicsInfo from "./pages/EditTelematicsInfo";
 import ApproveUsersPage from "./pages/ApproveUsersPage";
+import TowTruckSignup from "./pages/TowTruckSignup";
 
 function App() {
   return (
@@ -22,6 +23,7 @@ function App() {
       <Routes>
         <Route path="/" element={<LandingPage />} />
         <Route path="/signup" element={<SignupPage />} />
+        <Route path="towtruck/signup" element={<TowTruckSignup />} />
         <Route path="/login" element={<LoginPage />} />
         <Route
           path="/signup-confirmation"
@@ -39,10 +41,7 @@ function App() {
           path="/profile/notifications"
           element={<ConfigureNotifications />}
         />
-        <Route
-          path="/approve/users"
-          element={<ApproveUsersPage />}
-        />
+        <Route path="/approve/users" element={<ApproveUsersPage />} />
       </Routes>
       <ToastContainer />
     </Router>

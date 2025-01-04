@@ -2,7 +2,6 @@
 import { useState, useEffect } from "react";
 import {
   Bell,
-  CreditCard,
   MapPin,
   Phone,
   Mail,
@@ -12,14 +11,14 @@ import {
   User,
   Lock,
   Settings,
-  FileText,
   Truck,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import api from "@/controller/axiosController";
 import useCookie from "@/hooks/useCookie";
+import { InviteUser } from "@/components/InviteUser";
 
 export interface UserData {
   companyName: string;
@@ -45,13 +44,29 @@ export interface UserData {
     telematicProvider: string;
     telematicApiKey: string;
   };
-  operationalRegion?: string;
+  operationalRegions?: string[];
 }
 
 export default function ProfilePage() {
   const [data, setData] = useState<UserData>();
-  const [userType] = useCookie("userType", "");
-  const [userId] = useCookie("userId", "");
+  const [userId, _setUserId, removeUserId] = useCookie("userId", "");
+  const [_token, _setToken, removeToken] = useCookie("token", "");
+  const [_expiresIn, _setExpiresIn, removeExpiresIn] = useCookie(
+    "expiresIn",
+    ""
+  );
+  const [userType, _setUserType, removeUserType] = useCookie("userType", "");
+
+  const navigate = useNavigate();
+
+  const onLogOut = (event: any) => {
+    event.preventDefault();
+    removeToken();
+    removeExpiresIn();
+    removeUserType();
+    removeUserId();
+    navigate("/login");
+  };
 
   useEffect(() => {
     const fetchUserType = async () => {
@@ -208,8 +223,8 @@ export default function ProfilePage() {
                   </div>
                   <div className="flex flex-wrap gap-2">
                     <div className="bg-[#3b5998] text-white px-3 py-1 rounded-full">
-                      {data?.operationalRegion
-                        ? data.operationalRegion
+                      {data?.operationalRegions
+                        ? data.operationalRegions
                         : "No operational region found"}
                     </div>
                   </div>
@@ -217,33 +232,23 @@ export default function ProfilePage() {
               </>
             )}
 
-            {userType === "repo-company" && (
+            {userType === "REPO_COMPANY" && (
               <>
                 {/* Tow Truck Operators Section */}
                 <div className="p-4 rounded-lg shadow-sm bg-gray-50 sm:p-6">
                   <div className="flex items-center justify-between mb-4">
-                    <h3 className="text-xl font-semibold text-[#2B4380]">
+                    <h3 className="text-xl font-semibold text-[#2B4380] ">
                       Tow Truck Operators
                     </h3>
                     <div className="space-x-2">
-                      <Link to="/profile/operators/new">
-                        <Button
+                      <InviteUser />
+                      {/* <Button
                           variant="outline"
                           size="sm"
-                          className="bg-[#3b5998] text-white hover:bg-[#344e86]"
-                        >
-                          Add Operator
-                        </Button>
-                      </Link>
-                      <Link to="/profile/operators">
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          className="bg-[#3b5998] text-white hover:bg-[#344e86]"
+                          className="bg-[#3b5998] text-white hover:bg-[#344e86] hover:text-white"
                         >
                           View All
-                        </Button>
-                      </Link>
+                        </Button> */}
                     </div>
                   </div>
                   <div className="grid gap-3">
@@ -299,7 +304,7 @@ export default function ProfilePage() {
             </div>
 
             <div className="flex justify-end">
-              <Button variant="destructive" size="sm">
+              <Button variant="destructive" size="sm" onClick={onLogOut}>
                 <LogOut className="w-4 h-4 mr-2" />
                 Sign Out
               </Button>

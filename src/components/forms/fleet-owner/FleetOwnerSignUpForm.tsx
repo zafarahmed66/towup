@@ -33,6 +33,7 @@ import { Form, FormField, FormLabel, FormMessage } from "@/components/ui/form";
 import apiClient from "@/controller/axiosController";
 import { toast } from "react-toastify";
 import { AxiosError } from "axios";
+import { Checkbox } from "@/components/ui/checkbox";
 
 const formSchema = z
   .object({
@@ -66,6 +67,9 @@ const formSchema = z
       message: "User fullname is required",
     }),
     email: z.string().email(),
+    phoneNumber: z.string().regex(/^\d{10}$/, {
+      message: "Phone number should be exactly 10 digits.",
+    }).optional(),
     password: z
       .string()
       .min(12, {
@@ -110,6 +114,7 @@ const formSchema = z
   });
 
 export default function FleetOwnerSignupPage() {
+  const [useCompanyPhone, setUseCompanyPhone] = useState(false);
   const [step, setStep] = useState(1);
 
   const form = useForm<z.infer<typeof formSchema>>({
@@ -156,6 +161,7 @@ export default function FleetOwnerSignupPage() {
       state,
       street,
       telematicsProvider,
+      phoneNumber,
     } = values;
 
     const data = {
@@ -177,6 +183,7 @@ export default function FleetOwnerSignupPage() {
         email,
         fullname: fullName,
         password,
+        phoneNumber: useCompanyPhone ? companyPhone : phoneNumber,
         appNotificationSetting: {
           emailNotificationEnabled: emailNotification,
           smsNotificationEnabled: smsNotification,
@@ -205,8 +212,10 @@ export default function FleetOwnerSignupPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     const isValid = await form.trigger();
+    console.log(form.getValues());
 
-    if (isValid) { form.handleSubmit(onSubmit)(e);
+    if (isValid) {
+      form.handleSubmit(onSubmit)(e);
     } else {
       toast.error("Please, ensure all fields are valid");
     }
@@ -265,6 +274,7 @@ export default function FleetOwnerSignupPage() {
                           <Phone className="h-4 w-4 text-[#3b5998]" />
                           Company Phone
                         </FormLabel>
+
                         <Input
                           id="companyPhone"
                           type="tel"
@@ -451,6 +461,61 @@ export default function FleetOwnerSignupPage() {
                           id="email"
                           placeholder="john@gmail.com"
                           {...field}
+                        />
+                        <FormMessage />
+                      </div>
+                    )}
+                  />
+
+                  {/* Phone Number */}
+                  <FormField
+                    control={form.control}
+                    name="phoneNumber"
+                    render={({ field }) => (
+                      <div className="space-y-2">
+                        <FormLabel
+                          htmlFor="phoneNumber"
+                          className="flex items-center gap-2"
+                        >
+                          <Phone className="h-4 w-4 text-[#3b5998]" />
+                          Phone Number
+                        </FormLabel>
+                        <div className="flex items-center mb-2 space-x-2">
+                          <Checkbox
+                            id="useCompanyPhone"
+                            checked={useCompanyPhone}
+                            onCheckedChange={(checked) =>
+                              setUseCompanyPhone(checked as boolean)
+                            }
+                          />
+                          <label
+                            htmlFor="useCompanyPhone"
+                            className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                          >
+                            Use company phone
+                          </label>
+                        </div>
+
+                        <Input
+                          id="phoneNumber"
+                          type="tel"
+                          placeholder="(555) 987-6543"
+                          value={
+                            useCompanyPhone
+                              ? form.getValues("companyPhone")
+                              : field.value
+                          }
+                          disabled={useCompanyPhone}
+                          onChange={(e) => {
+                            if (!useCompanyPhone) {
+                              form.setValue("phoneNumber", e.target.value);
+                            } else {
+                              form.setValue(
+                                "phoneNumber",
+                                form.getValues("companyPhone")
+                              );
+                            }
+                          }}
                         />
                         <FormMessage />
                       </div>

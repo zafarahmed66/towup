@@ -6,9 +6,8 @@ import { useForm } from "react-hook-form";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Switch } from "@/components/ui/switch";
-import { User, Mail, Phone, Lock, Building2, Bell } from "lucide-react";
-import { Link, useNavigate } from "react-router-dom";
+import { User, Mail, Phone, Lock, Building2 } from "lucide-react";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { Form, FormField, FormLabel, FormMessage } from "@/components/ui/form";
 import apiClient from "@/controller/axiosController";
 import { toast } from "react-toastify";
@@ -30,7 +29,6 @@ const formSchema = z
     fullName: z.string().min(2, {
       message: "User fullname is required",
     }),
-    email: z.string().email(),
     password: z
       .string()
       .min(12, {
@@ -58,9 +56,6 @@ const formSchema = z
     phoneNumber: z.string().regex(/^\d{10}$/, {
       message: "Phone number should be exactly 10 digits.",
     }),
-    emailNotification: z.boolean().default(true),
-    smsNotification: z.boolean().default(true),
-    pushNotification: z.boolean().default(true),
   })
   .refine((data) => data.password === data.confirmPassword, {
     message: "Passwords don't match",
@@ -69,19 +64,21 @@ const formSchema = z
 
 export default function TowTruckOperatorSignUpForm() {
   const [step, setStep] = useState(1);
+  const [searchParams] = useSearchParams();
+  const email = searchParams.get("email");
+  const token = searchParams.get("token");
+
+  console.log(email);
+  console.log(token);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       operatorName: "",
       licenseNumber: "",
-      email: "",
       fullName: "",
       password: "",
       phoneNumber: "",
-      emailNotification: true,
-      smsNotification: true,
-      pushNotification: true,
     },
   });
 
@@ -91,19 +88,11 @@ export default function TowTruckOperatorSignUpForm() {
   const prevStep = () => setStep(step - 1);
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
-    const {
-      operatorName,
-      licenseNumber,
-      phoneNumber,
-      email,
-      emailNotification,
-      fullName,
-      password,
-      pushNotification,
-      smsNotification,
-    } = values;
+    const { operatorName, licenseNumber, phoneNumber, fullName, password } =
+      values;
 
     const data = {
+      token,
       operatorName,
       licenseNumber,
       user: {
@@ -111,11 +100,6 @@ export default function TowTruckOperatorSignUpForm() {
         fullname: fullName,
         password,
         phoneNumber,
-        appNotificationSetting: {
-          emailNotificationEnabled: emailNotification,
-          smsNotificationEnabled: smsNotification,
-          appNotificationEnabled: pushNotification,
-        },
       },
     };
 
@@ -270,30 +254,6 @@ export default function TowTruckOperatorSignUpForm() {
                     )}
                   />
 
-                  {/* Email  */}
-                  <FormField
-                    control={form.control}
-                    name="email"
-                    render={({ field }) => (
-                      <div className="space-y-2">
-                        <FormLabel
-                          htmlFor="email"
-                          className="flex items-center gap-2"
-                        >
-                          <Mail className="h-4 w-4 text-[#3b5998]" />
-                          Email
-                        </FormLabel>
-
-                        <Input
-                          id="email"
-                          placeholder="john@gmail.com"
-                          {...field}
-                        />
-                        <FormMessage />
-                      </div>
-                    )}
-                  />
-
                   {/* Password  */}
                   <FormField
                     control={form.control}
@@ -342,112 +302,6 @@ export default function TowTruckOperatorSignUpForm() {
                     )}
                   />
 
-                  <div className="flex flex-col space-y-2 sm:flex-row sm:space-x-2 sm:space-y-0">
-                    <Button
-                      type="button"
-                      onClick={prevStep}
-                      className="w-1/2 text-gray-800 bg-gray-300 hover:bg-gray-400"
-                    >
-                      Back
-                    </Button>
-                    <Button
-                      type="button"
-                      onClick={nextStep}
-                      className="w-1/2 bg-[#3b5998] hover:bg-[#344e86] text-white"
-                    >
-                      Next
-                    </Button>
-                  </div>
-                </>
-              )}
-
-              {step === 3 && (
-                <>
-                  <h3 className="text-lg font-semibold text-[#2B4380] mb-4">
-                    Configure Notifications
-                  </h3>
-                  <div className="space-y-4">
-                    {/* Email Notification  */}
-                    <FormField
-                      control={form.control}
-                      name="emailNotification"
-                      render={() => (
-                        <div className="flex items-center justify-between">
-                          <div className="flex items-center space-x-2">
-                            <Bell className="h-4 w-4 text-[#3b5998]" />
-                            <FormLabel
-                              htmlFor="emailNotification"
-                              className="text-sm font-medium"
-                            >
-                              Email Notifications
-                            </FormLabel>
-                          </div>
-                          <Switch
-                            id="emailNotification"
-                            checked={form.getValues("emailNotification")}
-                            onCheckedChange={(checked) =>
-                              form.setValue("emailNotification", checked)
-                            }
-                          />
-                          <FormMessage />
-                        </div>
-                      )}
-                    />
-
-                    {/* SMS Notification  */}
-                    <FormField
-                      control={form.control}
-                      name="smsNotification"
-                      render={() => (
-                        <div className="flex items-center justify-between">
-                          <div className="flex items-center space-x-2">
-                            <Bell className="h-4 w-4 text-[#3b5998]" />
-                            <FormLabel
-                              htmlFor="smsNotification"
-                              className="text-sm font-medium"
-                            >
-                              SMS Notifications
-                            </FormLabel>
-                          </div>
-                          <Switch
-                            id="smsNotification"
-                            checked={form.getValues("smsNotification")}
-                            onCheckedChange={(checked) =>
-                              form.setValue("smsNotification", checked)
-                            }
-                          />
-                          <FormMessage />
-                        </div>
-                      )}
-                    />
-
-                    {/* Push Notification  */}
-                    <FormField
-                      control={form.control}
-                      name="pushNotification"
-                      render={() => (
-                        <div className="flex items-center justify-between">
-                          <div className="flex items-center space-x-2">
-                            <Bell className="h-4 w-4 text-[#3b5998]" />
-                            <FormLabel
-                              htmlFor="pushNotification"
-                              className="text-sm font-medium"
-                            >
-                              SMS Notifications
-                            </FormLabel>
-                          </div>
-                          <Switch
-                            id="pushNotification"
-                            checked={form.getValues("pushNotification")}
-                            onCheckedChange={(checked) =>
-                              form.setValue("pushNotification", checked)
-                            }
-                          />
-                          <FormMessage />
-                        </div>
-                      )}
-                    />
-                  </div>
                   <div className="flex flex-col space-y-2 sm:flex-row sm:space-x-2 sm:space-y-0">
                     <Button
                       type="button"

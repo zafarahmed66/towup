@@ -1,7 +1,8 @@
-import styled from 'styled-components';
-import { Link, useNavigate } from 'react-router-dom';
-import { useState, useEffect } from 'react';
-import useCookie from '../../hooks/useCookie';
+/* eslint-disable @typescript-eslint/no-unused-vars */
+import styled from "styled-components";
+import { Link, useNavigate } from "react-router-dom";
+import { useState, useEffect } from "react";
+import useCookie from "../../hooks/useCookie";
 
 const Nav = styled.nav<{ scrolled: boolean }>`
   position: fixed;
@@ -12,7 +13,10 @@ const Nav = styled.nav<{ scrolled: boolean }>`
   justify-content: space-between;
   align-items: center;
   padding: 1.5rem 4rem;
-  background: ${props => props.scrolled ? 'linear-gradient(135deg, #1e3c72 0%, #2a5298 100%)' : 'transparent'};
+  background: ${(props) =>
+    props.scrolled
+      ? "linear-gradient(135deg, #1e3c72 0%, #2a5298 100%)"
+      : "transparent"};
   transition: background 0.3s ease;
   z-index: 1000;
 `;
@@ -28,13 +32,13 @@ const NavLinks = styled.div`
   display: flex;
   gap: 2rem;
   align-items: center;
-  
+
   a {
     color: white;
     text-decoration: none;
     font-weight: 500;
     opacity: 0.9;
-    
+
     &:hover {
       opacity: 1;
     }
@@ -42,13 +46,13 @@ const NavLinks = styled.div`
 `;
 
 const SignUpButton = styled(Link)`
-  background: #4CAF50;
+  background: #4caf50;
   color: white;
   padding: 0.75rem 1.5rem;
   border-radius: 8px;
   text-decoration: none;
   font-weight: 500;
-  
+
   &:hover {
     background: #45a049;
     transform: translateY(-2px);
@@ -59,8 +63,13 @@ const SignUpButton = styled(Link)`
 const Navigation = () => {
   const navigate = useNavigate();
   const [scrolled, setScrolled] = useState(false);
-  const [token, setToken, removeToken] = useCookie('token', '');
-  const [expiresIn, setExpiresIn, removeExpiresIn] = useCookie('expiresIn', '');
+  const [token, _setToken, removeToken] = useCookie("token", "");
+  const [_expiresIn, _setExpiresIn, removeExpiresIn] = useCookie(
+    "expiresIn",
+    ""
+  );
+  const [_userType, _setUserType, removeUserType] = useCookie("userType", "");
+  const [_userId, _setUserId, removeUserId] = useCookie("userId", "");
 
   useEffect(() => {
     const handleScroll = () => {
@@ -68,16 +77,18 @@ const Navigation = () => {
       setScrolled(isScrolled);
     };
 
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
   }, []);
-  
+
   const onLogOut = (event: any) => {
     event.preventDefault();
-    removeToken()
-    removeExpiresIn()
-    navigate('/login')
-  }
+    removeToken();
+    removeExpiresIn();
+    removeUserType();
+    removeUserId();
+    navigate("/login");
+  };
 
   return (
     <Nav scrolled={scrolled}>
@@ -88,13 +99,16 @@ const Navigation = () => {
         <a href="#how-it-works">How it works</a>
         <a href="#repo-companies">Tow Trucks</a>
         <a href="#faqs">FAQs</a>
-        {
-          token ? <a href="#" onClick={onLogOut}>Logout</a> : 
+        {token ? (
+          <a href="#" onClick={onLogOut}>
+            Logout
+          </a>
+        ) : (
           <>
             <Link to="/login">Login</Link>
             <SignUpButton to="/signup">Sign Up</SignUpButton>
           </>
-        }
+        )}
       </NavLinks>
     </Nav>
   );
