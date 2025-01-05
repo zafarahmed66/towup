@@ -15,6 +15,7 @@ import ConfigureNotifications from "./pages/AccountNotifications";
 import EditTelematicsInfo from "./pages/EditTelematicsInfo";
 import ApproveUsersPage from "./pages/ApproveUsersPage";
 import TowTruckSignup from "./pages/TowTruckSignup";
+import EditOperationalRegions from "./pages/EditRegion";
 
 function App() {
   return (
@@ -33,6 +34,7 @@ function App() {
         <Route path="/profile" element={<ProfilePage />} />
         <Route path="/profile/account/edit" element={<EditAccountDetails />} />
         <Route path="/profile/user/edit" element={<EditUserProfile />} />
+        <Route path="/profile/regions/edit" element={<EditOperationalRegions />} />
         <Route
           path="/profile/telematics/edit"
           element={<EditTelematicsInfo />}

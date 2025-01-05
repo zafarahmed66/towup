@@ -27,6 +27,7 @@ import {
   FlagTriangleRight,
   MapIcon,
   MapPinned,
+  X,
 } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { Form, FormField, FormLabel, FormMessage } from "@/components/ui/form";
@@ -34,6 +35,7 @@ import apiClient from "@/controller/axiosController";
 import { toast } from "react-toastify";
 import { AxiosError } from "axios";
 import { Checkbox } from "@/components/ui/checkbox";
+import { Label } from "@/components/ui/label";
 
 const formSchema = z
   .object({
@@ -67,9 +69,12 @@ const formSchema = z
       message: "User fullname is required",
     }),
     email: z.string().email(),
-    phoneNumber: z.string().regex(/^\d{10}$/, {
-      message: "Phone number should be exactly 10 digits.",
-    }).optional(),
+    phoneNumber: z
+      .string()
+      .regex(/^\d{10}$/, {
+        message: "Phone number should be exactly 10 digits.",
+      })
+      .optional(),
     password: z
       .string()
       .min(12, {
@@ -101,9 +106,7 @@ const formSchema = z
     apiKey: z.string().min(2, {
       message: "API key is required",
     }),
-    selectedRegion: z.string().min(2, {
-      message: "Region is required",
-    }),
+
     emailNotification: z.boolean().default(true),
     smsNotification: z.boolean().default(true),
     pushNotification: z.boolean().default(true),
@@ -115,6 +118,8 @@ const formSchema = z
 
 export default function FleetOwnerSignupPage() {
   const [useCompanyPhone, setUseCompanyPhone] = useState(false);
+  const [selectedRegions, setSelectedRegions] = useState<string[]>([]);
+
   const [step, setStep] = useState(1);
 
   const form = useForm<z.infer<typeof formSchema>>({
@@ -125,7 +130,6 @@ export default function FleetOwnerSignupPage() {
       street: "",
       city: "",
       postalCode: "",
-      selectedRegion: "",
       country: "",
       telematicsProvider: "",
       apiKey: "",
@@ -156,7 +160,6 @@ export default function FleetOwnerSignupPage() {
       password,
       postalCode,
       pushNotification,
-      selectedRegion,
       smsNotification,
       state,
       street,
@@ -167,7 +170,7 @@ export default function FleetOwnerSignupPage() {
     const data = {
       companyName,
       phoneNumber: Number(companyPhone),
-      operationalRegion: selectedRegion,
+      operationalRegions: selectedRegions,
       address: {
         street,
         city,
@@ -219,6 +222,16 @@ export default function FleetOwnerSignupPage() {
     } else {
       toast.error("Please, ensure all fields are valid");
     }
+  };
+
+  const handleRegionSelect = (value: string) => {
+    if (!selectedRegions.includes(value)) {
+      setSelectedRegions([...selectedRegions, value]);
+    }
+  };
+
+  const removeRegion = (region: string) => {
+    setSelectedRegions(selectedRegions.filter((r) => r !== region));
   };
 
   return (
@@ -674,43 +687,45 @@ export default function FleetOwnerSignupPage() {
                     Operational Regions
                   </h3>
                   <div className="space-y-4">
-                    {/* Select Region  */}
-                    <FormField
-                      control={form.control}
-                      name="selectedRegion"
-                      render={() => (
-                        <div className="space-y-2">
-                          <FormLabel
-                            htmlFor="selectedRegion"
-                            className="flex items-center gap-2"
+                    <div className="space-y-2">
+                      <Label
+                        htmlFor="region"
+                        className="flex items-center gap-2"
+                      >
+                        <MapPin className="h-4 w-4 text-[#3b5998]" />
+                        Select Region
+                      </Label>
+                      <Select onValueChange={handleRegionSelect}>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select a region" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="NEW_YORK_METRO">
+                            New York Region
+                          </SelectItem>
+                          <SelectItem value="SAN_FRANCISCO_BAY">
+                            San Francisco Region
+                          </SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div className="flex flex-wrap gap-2">
+                      {selectedRegions.map((region) => (
+                        <div
+                          key={region}
+                          className="bg-[#3b5998] text-white px-3 py-1 rounded-full flex items-center"
+                        >
+                          <span>{region}</span>
+                          <button
+                            type="button"
+                            onClick={() => removeRegion(region)}
+                            className="ml-2 focus:outline-none"
                           >
-                            <MapPin className="h-4 w-4 text-[#3b5998]" />
-                            Select Region
-                          </FormLabel>
-                          <Select
-                            onValueChange={(value) => {
-                              form.setValue("selectedRegion", value);
-                            }}
-                          >
-                            <SelectTrigger>
-                              <SelectValue placeholder="Select a region" />
-                            </SelectTrigger>
-                            <SelectContent>
-                              <SelectItem value="NEW_YORK_METRO">
-                                New York Metro
-                              </SelectItem>
-                              <SelectItem value="san-francisco">
-                                San Francisco Region
-                              </SelectItem>
-                              <SelectItem value="los-angeles">
-                                Los Angeles Region
-                              </SelectItem>
-                            </SelectContent>
-                          </Select>
-                          <FormMessage />
+                            <X className="w-4 h-4" />
+                          </button>
                         </div>
-                      )}
-                    />
+                      ))}
+                    </div>
                   </div>
                   <div className="flex flex-col space-y-2 sm:flex-row sm:space-x-2 sm:space-y-0">
                     <Button

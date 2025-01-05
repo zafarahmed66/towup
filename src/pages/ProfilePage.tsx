@@ -20,7 +20,7 @@ import api from "@/controller/axiosController";
 import useCookie from "@/hooks/useCookie";
 import { InviteUser } from "@/components/InviteUser";
 
-export interface UserData {
+export interface kUserData {
   companyName: string;
   phoneNumber: string;
   address: {
@@ -210,7 +210,7 @@ export default function ProfilePage() {
                     <h3 className="text-xl font-semibold text-[#2B4380]">
                       Operational Regions
                     </h3>
-                    <Link to="/profile/regions/edit">
+                    <Link to="/profile/regions/edit" state={data}>
                       <Button
                         variant="outline"
                         size="sm"
@@ -222,11 +222,16 @@ export default function ProfilePage() {
                     </Link>
                   </div>
                   <div className="flex flex-wrap gap-2">
-                    <div className="bg-[#3b5998] text-white px-3 py-1 rounded-full">
-                      {data?.operationalRegions
-                        ? data.operationalRegions
-                        : "No operational region found"}
-                    </div>
+                    {data?.operationalRegions
+                      ? data.operationalRegions.map((region, index) => (
+                          <span
+                            className="bg-[#3b5998] text-white px-3 py-1 rounded-full "
+                            key={index}
+                          >
+                            {region}
+                          </span>
+                        ))
+                      : "No operational region found"}
                   </div>
                 </div>
               </>
