@@ -20,7 +20,7 @@ import api from "@/controller/axiosController";
 import useCookie from "@/hooks/useCookie";
 import { InviteUser } from "@/components/InviteUser";
 
-export interface kUserData {
+export interface UserData {
   companyName: string;
   phoneNumber: string;
   address: {
