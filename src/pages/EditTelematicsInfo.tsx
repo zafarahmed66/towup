@@ -11,7 +11,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Settings, Lock, ArrowLeft } from "lucide-react";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { UserData } from "./ProfilePage";
 import useCookie from "@/hooks/useCookie";
 import api from "@/controller/axiosController";
@@ -28,6 +28,8 @@ export default function EditTelematicsInfo() {
     state?.telematicSettings?.telematicApiKey ?? ""
   );
 
+  const navigate = useNavigate();
+
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
     try {
@@ -36,11 +38,6 @@ export default function EditTelematicsInfo() {
           telematicProvider: provider,
           telematicApiKey: apiKey,
         },
-        companyName: state.companyName,
-        phoneNumber: state.phoneNumber,
-        address: {
-          ...state.address,
-        },
       };
 
       await api.post(
@@ -48,6 +45,7 @@ export default function EditTelematicsInfo() {
         updatedData
       );
       toast.success("Account details updated successfully!");
+      navigate("/profile")
     } catch (error) {
       console.log(error);
       toast.error("Failed to update account details.");
@@ -97,7 +95,7 @@ export default function EditTelematicsInfo() {
                 </Label>
                 <Input
                   id="apiKey"
-                  type="password"
+                  type="text"
                   placeholder="Enter your API key"
                   value={apiKey}
                   onChange={(e) => setApiKey(e.target.value)}

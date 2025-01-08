@@ -10,7 +10,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { MapPin, ArrowLeft, X } from "lucide-react";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { UserData } from "./ProfilePage";
 import useCookie from "@/hooks/useCookie";
 import { toast } from "react-toastify";
@@ -24,18 +24,12 @@ export default function EditOperationalRegions() {
   );
   const [userType] = useCookie("userType", "");
 
+  const navigate = useNavigate();
+
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
     try {
       const updatedData = {
-        telematicSettings: {
-          ...state.telematicSettings,
-        },
-        companyName: state.companyName,
-        phoneNumber: state.phoneNumber,
-        address: {
-          ...state.address,
-        },
         operationalRegions: selectedRegions,
       };
 
@@ -44,6 +38,7 @@ export default function EditOperationalRegions() {
         updatedData
       );
       toast.success("Account details updated successfully!");
+      navigate("/profile");
     } catch (error) {
       console.log(error);
       toast.error("Failed to update account details.");
@@ -125,4 +120,3 @@ export default function EditOperationalRegions() {
     </div>
   );
 }
-

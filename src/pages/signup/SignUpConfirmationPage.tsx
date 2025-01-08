@@ -79,11 +79,11 @@ export default function SignupConfirmationPage() {
             </Button>
             <div className="text-center">
               <Link
-                to="/signup"
+                to="/login"
                 className="text-[#3b5998] hover:underline inline-flex items-center"
               >
                 <ArrowLeft className="w-4 h-4 mr-2" />
-                Back to Signup
+                Back to Login
               </Link>
             </div>
           </div>

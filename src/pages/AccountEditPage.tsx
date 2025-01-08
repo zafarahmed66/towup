@@ -2,7 +2,7 @@
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -61,12 +61,13 @@ export default function EditAccountDetails() {
     },
   });
 
+  const navigate = useNavigate();
+
 const onSubmit = async (data: EditAccountFormValues) => {
   try {
     const updatedData: any = {
       companyName: data.company,
       phoneNumber: Number(data.phone),
-      operationalRegions: state.operationalRegions,
       address: {
         street: data.street,
         city: data.city,
@@ -76,26 +77,13 @@ const onSubmit = async (data: EditAccountFormValues) => {
       },
     };
 
-    // Add telematics settings if userType is FLEET_OWNER
-    if (userType === "FLEET_OWNER") {
-      updatedData.telematicSettings = {
-        telematicProvider: state.telematicSettings?.telematicProvider,
-        telematicApiKey: state.telematicSettings?.telematicApiKey,
-      };
-    }
-
-    // Include user data if userType is REPO_COMPANY
-    if (userType === "REPO_COMPANY") {
-      updatedData.user = {
-        ...state.user,
-      };
-    }
 
     await api.post(
       `/api/${userType === "FLEET_OWNER" ? "fleetowners" : "repo-companies"}/me/update`,
       updatedData
     );
     toast.success("Account details updated successfully!");
+    navigate("/profile");
   } catch (error) {
     console.error(error);
     toast.error("Failed to update account details.");

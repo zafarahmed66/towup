@@ -49,6 +49,7 @@ export interface UserData {
 
 export default function ProfilePage() {
   const [data, setData] = useState<UserData>();
+  const [isLoading, setIsLoading] = useState(true);
   const [userId, _setUserId, removeUserId] = useCookie("userId", "");
   const [_token, _setToken, removeToken] = useCookie("token", "");
   const [_expiresIn, _setExpiresIn, removeExpiresIn] = useCookie(
@@ -70,14 +71,20 @@ export default function ProfilePage() {
 
   useEffect(() => {
     const fetchUserType = async () => {
-      const response = await api.get(
-        `/api/${userType === "FLEET_OWNER" ? "fleetowners" : "repo-companies"}/${userId}`
-      );
-      setData(response.data);
+      try {
+        const response = await api.get(
+          `/api/${userType === "FLEET_OWNER" ? "fleetowners" : "repo-companies"}/${userId}`
+        );
+        setData(response.data);
+      } catch (error) {
+        console.error("Error fetching user data:", error);
+      } finally {
+        setIsLoading(false);
+      }
     };
 
     fetchUserType();
-  }, []);
+  }, [userType, userId]);
 
   return (
     <div className="min-h-screen bg-[#2B4380] w-screen">
@@ -99,222 +106,232 @@ export default function ProfilePage() {
               </div>
             </div>
           </div>
-          <CardContent className="pt-6 space-y-8">
-            {/* Account Details Section */}
-            <div className="p-4 rounded-lg shadow-sm bg-gray-50 sm:p-6">
-              <div className="flex items-center justify-between mb-4">
-                <h3 className="text-xl font-semibold text-[#2B4380]">
-                  Account Details
-                </h3>
-                <Link to="/profile/account/edit" state={data}>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    className="bg-[#3b5998] text-white hover:bg-[#344e86] hover:text-white"
-                  >
-                    <Edit className="w-4 h-4 mr-2" />
-                    Edit
-                  </Button>
-                </Link>
-              </div>
-              <div className="grid gap-3">
-                <div className="flex items-center gap-3 text-sm">
-                  <Building2 className="h-5 w-5 text-[#3b5998]" />
-                  <span>{data?.companyName}</span>
-                </div>
-                <div className="flex items-center gap-3 text-sm">
-                  <Phone className="h-5 w-5 text-[#3b5998]" />
-                  <span>{data?.phoneNumber}</span>
-                </div>
-                <div className="flex items-center gap-3 text-sm">
-                  <MapPin className="h-5 w-5 text-[#3b5998]" />
-                  <span>
-                    {data?.address.street}, {data?.address.city},{" "}
-                    {data?.address.state}, {data?.address.country},{" "}
-                    {data?.address.postalCode}
-                  </span>
-                </div>
-              </div>
+          {isLoading ? ( // Skeleton Loader
+            <div className="p-4 space-y-4">
+              <div className="bg-gray-300 rounded-lg h-36 animate-pulse"></div>
+              <div className="h-48 bg-gray-300 rounded-lg animate-pulse"></div>
+              <div className="bg-gray-300 rounded-lg h-36 animate-pulse"></div>
             </div>
-
-            {/* User Profile Section */}
-            <div className="p-4 rounded-lg shadow-sm bg-gray-50 sm:p-6">
-              <div className="flex items-center justify-between mb-4">
-                <h3 className="text-xl font-semibold text-[#2B4380]">
-                  User Profile
-                </h3>
-                <Link to="/profile/user/edit" state={data}>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    className="bg-[#3b5998] text-white hover:bg-[#344e86] hover:text-white"
-                  >
-                    <Edit className="w-4 h-4 mr-2" />
-                    Edit
-                  </Button>
-                </Link>
+           ) : (
+            <CardContent className="pt-6 space-y-8">
+              {/* Account Details Section */}
+              <div className="p-4 rounded-lg shadow-sm bg-gray-50 sm:p-6">
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="text-xl font-semibold text-[#2B4380]">
+                    Account Details
+                  </h3>
+                  <Link to="/profile/account/edit" state={data}>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="bg-[#3b5998] text-white hover:bg-[#344e86] hover:text-white"
+                    >
+                      <Edit className="w-4 h-4 mr-2" />
+                      Edit
+                    </Button>
+                  </Link>
+                </div>
+                <div className="grid gap-3">
+                  <div className="flex items-center gap-3 text-sm">
+                    <Building2 className="h-5 w-5 text-[#3b5998]" />
+                    <span>{data?.companyName}</span>
+                  </div>
+                  <div className="flex items-center gap-3 text-sm">
+                    <Phone className="h-5 w-5 text-[#3b5998]" />
+                    <span>{data?.phoneNumber}</span>
+                  </div>
+                  <div className="flex items-center gap-3 text-sm">
+                    <MapPin className="h-5 w-5 text-[#3b5998]" />
+                    <span>
+                      {data?.address.street}, {data?.address.city},{" "}
+                      {data?.address.state}, {data?.address.country},{" "}
+                      {data?.address.postalCode}
+                    </span>
+                  </div>
+                </div>
               </div>
-              <div className="grid gap-3">
-                <div className="flex items-center gap-3 text-sm">
-                  <User className="h-5 w-5 text-[#3b5998]" />
-                  <span>{data?.user.fullname}</span>
+
+              {/* User Profile Section */}
+              <div className="p-4 rounded-lg shadow-sm bg-gray-50 sm:p-6">
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="text-xl font-semibold text-[#2B4380]">
+                    User Profile
+                  </h3>
+                  <Link to="/profile/user/edit" state={data}>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="bg-[#3b5998] text-white hover:bg-[#344e86] hover:text-white"
+                    >
+                      <Edit className="w-4 h-4 mr-2" />
+                      Edit
+                    </Button>
+                  </Link>
                 </div>
-                <div className="flex items-center gap-3 text-sm">
-                  <Mail className="h-5 w-5 text-[#3b5998]" />
-                  <span>{data?.user.email}</span>
-                </div>
-                <div className="flex items-center gap-3 text-sm">
-                  <Phone className="h-5 w-5 text-[#3b5998]" />
-                  <span>{data?.user.phoneNumber}</span>
+                <div className="grid gap-3">
+                  <div className="flex items-center gap-3 text-sm">
+                    <User className="h-5 w-5 text-[#3b5998]" />
+                    <span>{data?.user.fullname}</span>
+                  </div>
+                  <div className="flex items-center gap-3 text-sm">
+                    <Mail className="h-5 w-5 text-[#3b5998]" />
+                    <span>{data?.user.email}</span>
+                  </div>
+                  <div className="flex items-center gap-3 text-sm">
+                    <Phone className="h-5 w-5 text-[#3b5998]" />
+                    <span>{data?.user.phoneNumber}</span>
+                  </div>
                 </div>
               </div>
-            </div>
 
-            {userType === "FLEET_OWNER" && (
-              <>
-                {/* Telematics Information Section */}
-                <div className="p-4 rounded-lg shadow-sm bg-gray-50 sm:p-6">
-                  <div className="flex items-center justify-between mb-4">
-                    <h3 className="text-xl font-semibold text-[#2B4380]">
-                      Telematics Information
-                    </h3>
-                    <Link to="/profile/telematics/edit" state={data}>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        className="bg-[#3b5998] text-white hover:bg-[#344e86] hover:text-white"
-                      >
-                        <Edit className="w-4 h-4 mr-2" />
-                        Edit
-                      </Button>
-                    </Link>
-                  </div>
-                  <div className="grid gap-3">
-                    <div className="flex items-center gap-3 text-sm">
-                      <Settings className="h-5 w-5 text-[#3b5998]" />
-                      <span>
-                        Telematics Provider:{" "}
-                        {data?.telematicSettings?.telematicProvider}
-                      </span>
+              {userType === "FLEET_OWNER" && (
+                <>
+                  {/* Telematics Information Section */}
+                  <div className="p-4 rounded-lg shadow-sm bg-gray-50 sm:p-6">
+                    <div className="flex items-center justify-between mb-4">
+                      <h3 className="text-xl font-semibold text-[#2B4380]">
+                        Telematics Information
+                      </h3>
+                      <Link to="/profile/telematics/edit" state={data}>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="bg-[#3b5998] text-white hover:bg-[#344e86] hover:text-white"
+                        >
+                          <Edit className="w-4 h-4 mr-2" />
+                          Edit
+                        </Button>
+                      </Link>
                     </div>
-                    <div className="flex items-center gap-3 text-sm">
-                      <Lock className="h-5 w-5 text-[#3b5998]" />
-                      <span>API Key: ••••••••••••••••</span>
+                    <div className="grid gap-3">
+                      <div className="flex items-center gap-3 text-sm">
+                        <Settings className="h-5 w-5 text-[#3b5998]" />
+                        <span>
+                          Telematics Provider:{" "}
+                          {data?.telematicSettings?.telematicProvider}
+                        </span>
+                      </div>
+                      <div className="flex items-center gap-3 text-sm">
+                        <Lock className="h-5 w-5 text-[#3b5998]" />
+                        <span>API Key: ••••••••••••••••</span>
+                      </div>
                     </div>
                   </div>
-                </div>
 
-                {/* Operational Regions Section */}
-                <div className="p-4 rounded-lg shadow-sm bg-gray-50 sm:p-6">
-                  <div className="flex items-center justify-between mb-4">
-                    <h3 className="text-xl font-semibold text-[#2B4380]">
-                      Operational Regions
-                    </h3>
-                    <Link to="/profile/regions/edit" state={data}>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        className="bg-[#3b5998] text-white hover:bg-[#344e86] hover:text-white"
-                      >
-                        <Edit className="w-4 h-4 mr-2" />
-                        Edit
-                      </Button>
-                    </Link>
+                  {/* Operational Regions Section */}
+                  <div className="p-4 rounded-lg shadow-sm bg-gray-50 sm:p-6">
+                    <div className="flex items-center justify-between mb-4">
+                      <h3 className="text-xl font-semibold text-[#2B4380]">
+                        Operational Regions
+                      </h3>
+                      <Link to="/profile/regions/edit" state={data}>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="bg-[#3b5998] text-white hover:bg-[#344e86] hover:text-white"
+                        >
+                          <Edit className="w-4 h-4 mr-2" />
+                          Edit
+                        </Button>
+                      </Link>
+                    </div>
+                    <div className="flex flex-wrap gap-2">
+                      {data?.operationalRegions
+                        ? data.operationalRegions.map((region, index) => (
+                            <span
+                              className="bg-[#3b5998] text-white px-3 py-1 rounded-full "
+                              key={index}
+                            >
+                              {region}
+                            </span>
+                          ))
+                        : "No operational region found"}
+                    </div>
                   </div>
-                  <div className="flex flex-wrap gap-2">
-                    {data?.operationalRegions
-                      ? data.operationalRegions.map((region, index) => (
-                          <span
-                            className="bg-[#3b5998] text-white px-3 py-1 rounded-full "
-                            key={index}
-                          >
-                            {region}
-                          </span>
-                        ))
-                      : "No operational region found"}
-                  </div>
-                </div>
-              </>
-            )}
+                </>
+              )}
 
-            {userType === "REPO_COMPANY" && (
-              <>
-                {/* Tow Truck Operators Section */}
-                <div className="p-4 rounded-lg shadow-sm bg-gray-50 sm:p-6">
-                  <div className="flex items-center justify-between mb-4">
-                    <h3 className="text-xl font-semibold text-[#2B4380] ">
-                      Tow Truck Operators
-                    </h3>
-                    <div className="space-x-2">
-                      <InviteUser />
-                      {/* <Button
+              {userType === "REPO_COMPANY" && (
+                <>
+                  {/* Tow Truck Operators Section */}
+                  <div className="p-4 rounded-lg shadow-sm bg-gray-50 sm:p-6">
+                    <div className="flex items-center justify-between mb-4">
+                      <h3 className="text-xl font-semibold text-[#2B4380] ">
+                        Tow Truck Operators
+                      </h3>
+                      <div className="space-x-2">
+                        <InviteUser />
+                        {/* <Button
                           variant="outline"
                           size="sm"
                           className="bg-[#3b5998] text-white hover:bg-[#344e86] hover:text-white"
                         >
                           View All
                         </Button> */}
+                      </div>
+                    </div>
+                    <div className="grid gap-3">
+                      <div className="flex items-center gap-3 text-sm">
+                        <Truck className="h-5 w-5 text-[#3b5998]" />
+                        <span>John Smith</span>
+                      </div>
+                      <div className="flex items-center gap-3 text-sm">
+                        <Truck className="h-5 w-5 text-[#3b5998]" />
+                        <span>Jane Doe</span>
+                      </div>
                     </div>
                   </div>
-                  <div className="grid gap-3">
-                    <div className="flex items-center gap-3 text-sm">
-                      <Truck className="h-5 w-5 text-[#3b5998]" />
-                      <span>John Smith</span>
-                    </div>
-                    <div className="flex items-center gap-3 text-sm">
-                      <Truck className="h-5 w-5 text-[#3b5998]" />
-                      <span>Jane Doe</span>
-                    </div>
-                  </div>
-                </div>
-              </>
-            )}
+                </>
+              )}
 
-            {/* Preferences Section */}
-            <div className="p-4 rounded-lg shadow-sm bg-gray-50 sm:p-6">
-              <h3 className="text-xl font-semibold text-[#2B4380] mb-4">
-                Preferences
-              </h3>
-              <div className="space-y-4">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <Bell className="h-5 w-5 text-[#3b5998]" />
-                    <div>
-                      <span className="text-sm font-medium">Notifications</span>
-                      <p className="text-xs text-gray-500">
-                        Email, SMS, and in-app notifications
-                      </p>
+              {/* Preferences Section */}
+              <div className="p-4 rounded-lg shadow-sm bg-gray-50 sm:p-6">
+                <h3 className="text-xl font-semibold text-[#2B4380] mb-4">
+                  Preferences
+                </h3>
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <Bell className="h-5 w-5 text-[#3b5998]" />
+                      <div>
+                        <span className="text-sm font-medium">
+                          Notifications
+                        </span>
+                        <p className="text-xs text-gray-500">
+                          Email, SMS, and in-app notifications
+                        </p>
+                      </div>
                     </div>
+                    <Link to="/profile/notifications" state={data}>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="bg-[#3b5998] text-white hover:bg-[#344e86] hover:text-white"
+                      >
+                        Configure
+                      </Button>
+                    </Link>
                   </div>
-                  <Link to="/profile/notifications" state={data}>
+                  {/* <div className="flex items-center justify-between">
                     <Button
                       variant="outline"
                       size="sm"
                       className="bg-[#3b5998] text-white hover:bg-[#344e86] hover:text-white"
                     >
-                      Configure
+                      Manage
                     </Button>
-                  </Link>
-                </div>
-                <div className="flex items-center justify-between">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    className="bg-[#3b5998] text-white hover:bg-[#344e86] hover:text-white"
-                  >
-                    Manage
-                  </Button>
+                  </div> */}
                 </div>
               </div>
-            </div>
 
-            <div className="flex justify-end">
-              <Button variant="destructive" size="sm" onClick={onLogOut}>
-                <LogOut className="w-4 h-4 mr-2" />
-                Sign Out
-              </Button>
-            </div>
-          </CardContent>
+              <div className="flex justify-end">
+                <Button variant="destructive" size="sm" onClick={onLogOut}>
+                  <LogOut className="w-4 h-4 mr-2" />
+                  Sign Out
+                </Button>
+              </div>
+            </CardContent>
+          )}
         </Card>
       </div>
     </div>

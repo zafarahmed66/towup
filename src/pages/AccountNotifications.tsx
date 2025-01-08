@@ -3,7 +3,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { Bell, Mail, MessageSquare, ArrowLeft } from "lucide-react";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useState } from "react";
 import { toast } from "react-toastify";
 import { UserData } from "./ProfilePage";
@@ -24,6 +24,8 @@ export default function ConfigureNotifications() {
     state?.user.appNotificationSetting.smsNotificationEnabled ?? false
   );
 
+  const navigate = useNavigate();
+
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
     try {
@@ -33,15 +35,11 @@ export default function ConfigureNotifications() {
           smsNotificationEnabled: smsNotifications,
           appNotificationEnabled: pushNotifications,
         },
-        fullName: state.user.fullname,
-        email: state.user.email,
-        phoneNumber: state.user.phoneNumber,
       };
 
       await api.post("/users/me/update", updatedData);
       toast.success("Notification preferences saved successfully!");
-
-      toast.success("Profile updated successfully!");
+      navigate("/profile");
     } catch (error) {
       toast.error("Failed to update profile.");
       console.error(error);

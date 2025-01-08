@@ -2,8 +2,8 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { User, Mail, Phone, ArrowLeft } from "lucide-react";
-import { Link, useLocation } from "react-router-dom";
+import { User, Mail, Phone, ArrowLeft, LockIcon } from "lucide-react";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -18,6 +18,7 @@ const editUserSchema = z.object({
   phoneNumber: z.string().regex(/^\d{10}$/, {
     message: "Phone number should be exactly 10 digits.",
   }),
+  password: z.string().min(6, "Password is required"),
 });
 
 type EditUserFormValues = z.infer<typeof editUserSchema>;
@@ -36,23 +37,24 @@ export default function EditUserProfile() {
     defaultValues: {
       fullName: state.user.fullname,
       email: state.user.email,
-      phoneNumber: state.user.phoneNumber,
+      phoneNumber: state.user.phoneNumber.toString(),
     },
   });
+
+  const navigate = useNavigate();
 
   // Submit function
   const onSubmit = async (data: EditUserFormValues) => {
     try {
       const updatedData = {
-        appNotificationSetting: {
-          ...state?.user?.appNotificationSetting,
-        },
-        fullName: data.fullName,
+        fullname: data.fullName,
         email: data.email,
-        phoneNumber: data.phoneNumber,
+        phoneNumber: Number(data.phoneNumber),
+        password: data.password,
       };
       await api.post("/users/me/update", updatedData);
       toast.success("Profile updated successfully!");
+      navigate("/profile");
     } catch (error) {
       toast.error("Failed to update profile.");
       console.error(error);
@@ -128,6 +130,25 @@ export default function EditUserProfile() {
                 {errors.phoneNumber && (
                   <p className="text-sm text-red-500">
                     {errors.phoneNumber.message}
+                  </p>
+                )}
+              </div>
+
+              {/* Password  */}
+              <div className="space-y-2">
+                <Label htmlFor="password" className="flex items-center gap-2">
+                  <LockIcon className="h-4 w-4 text-[#3b5998]" />
+                  Password
+                </Label>
+                <Input
+                  id="password"
+                  type="password"
+                  {...register("password")}
+                  placeholder="John Doe"
+                />
+                {errors.password && (
+                  <p className="text-sm text-red-500">
+                    {errors.password.message}
                   </p>
                 )}
               </div>
