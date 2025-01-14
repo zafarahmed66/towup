@@ -2,7 +2,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { User, Mail, Phone, ArrowLeft, LockIcon } from "lucide-react";
+import { User, Mail, Phone, ArrowLeft, LockIcon, Pencil } from "lucide-react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { z } from "zod";
 import { useForm } from "react-hook-form";
@@ -10,20 +10,28 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import api from "@/controller/axiosController";
 import { toast } from "react-toastify";
 import { UserData } from "./ProfilePage";
+import { useState } from "react";
 
 // Zod schema for form validation
-const editUserSchema = z.object({
-  fullName: z.string().min(1, "Fullname is required"),
-  email: z.string().email("Invalid email format"),
-  phoneNumber: z.string().regex(/^\d{10}$/, {
-    message: "Phone number should be exactly 10 digits.",
-  }),
-  password: z.string().min(6, "Password is required"),
-});
+const editUserSchema = z
+  .object({
+    fullName: z.string().min(1, "Fullname is required"),
+    email: z.string().email("Invalid email format"),
+    phoneNumber: z.string().regex(/^\d{10}$/, {
+      message: "Phone number should be exactly 10 digits.",
+    }),
+    password: z.string().optional(),
+    confirmPassword: z.string().optional(),
+  })
+  .refine((data) => !data.password || data.password === data.confirmPassword, {
+    message: "Passwords don't match",
+    path: ["confirmPassword"],
+  });
 
 type EditUserFormValues = z.infer<typeof editUserSchema>;
 
 export default function EditUserProfile() {
+  const [isEditingPassword, setIsEditingPassword] = useState(false);
   const location = useLocation();
   const state = location.state as UserData;
 
@@ -46,12 +54,22 @@ export default function EditUserProfile() {
   // Submit function
   const onSubmit = async (data: EditUserFormValues) => {
     try {
-      const updatedData = {
+      const updatedData: {
+        fullname: string;
+        email: string;
+        phoneNumber: number;
+        password?: string;
+      } = {
         fullname: data.fullName,
         email: data.email,
         phoneNumber: Number(data.phoneNumber),
-        password: data.password,
       };
+
+      // Add password only if it is being edited
+      if (isEditingPassword && data.password) {
+        updatedData.password = data.password;
+      }
+
       await api.post("/users/me/update", updatedData);
       toast.success("Profile updated successfully!");
       navigate("/profile");
@@ -134,17 +152,27 @@ export default function EditUserProfile() {
                 )}
               </div>
 
-              {/* Password  */}
+              {/* Password Section */}
               <div className="space-y-2">
-                <Label htmlFor="password" className="flex items-center gap-2">
-                  <LockIcon className="h-4 w-4 text-[#3b5998]" />
-                  Password
-                </Label>
+                <div className="flex items-center justify-between">
+                  <Label htmlFor="password" className="flex items-center gap-2">
+                    <LockIcon className="h-4 w-4 text-[#3b5998]" />
+                    Password
+                  </Label>
+                  <button
+                    type="button"
+                    onClick={() => setIsEditingPassword(!isEditingPassword)}
+                    className="text-blue-500 hover:underline"
+                  >
+                    <Pencil />
+                  </button>
+                </div>
                 <Input
                   id="password"
                   type="password"
+                  disabled={!isEditingPassword}
                   {...register("password")}
-                  placeholder="John Doe"
+                  placeholder="Enter new password"
                 />
                 {errors.password && (
                   <p className="text-sm text-red-500">
@@ -153,6 +181,30 @@ export default function EditUserProfile() {
                 )}
               </div>
 
+              {isEditingPassword && (
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between">
+                    <Label
+                      htmlFor="password"
+                      className="flex items-center gap-2"
+                    >
+                      <LockIcon className="h-4 w-4 text-[#3b5998]" />
+                      Confirm Password
+                    </Label>
+                  </div>
+                  <Input
+                    id="password"
+                    type="password"
+                    {...register("confirmPassword")}
+                    placeholder="Confirm Password"
+                  />
+                  {errors.confirmPassword && (
+                    <p className="text-sm text-red-500">
+                      {errors.confirmPassword.message}
+                    </p>
+                  )}
+                </div>
+              )}
               <Button
                 type="submit"
                 className="w-full bg-[#3b5998] hover:bg-[#344e86] text-white"

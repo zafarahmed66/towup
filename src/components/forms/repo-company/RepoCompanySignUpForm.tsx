@@ -227,7 +227,6 @@ export default function RepoCompanySignUpForm() {
                         </FormLabel>
                         <Input
                           id="company"
-                          placeholder="Fleet Operations Inc"
                           {...field}
                         />
                         <FormMessage />
@@ -250,7 +249,6 @@ export default function RepoCompanySignUpForm() {
                         </FormLabel>
                         <Input
                           id="companyPhone"
-                          placeholder="(555) 987-6543"
                           {...field}
                         />
                         <FormMessage />
@@ -275,7 +273,6 @@ export default function RepoCompanySignUpForm() {
                           </FormLabel>
                           <Input
                             id="street"
-                            placeholder="123 Fleet Street"
                             {...field}
                           />
                           <FormMessage />
@@ -298,7 +295,6 @@ export default function RepoCompanySignUpForm() {
                           </FormLabel>
                           <Input
                             id="City"
-                            placeholder="San Francisco"
                             {...field}
                           />
                           <FormMessage />
@@ -323,7 +319,6 @@ export default function RepoCompanySignUpForm() {
                           </FormLabel>
                           <Input
                             id="country"
-                            placeholder="United States"
                             {...field}
                           />
                           <FormMessage />
@@ -346,7 +341,6 @@ export default function RepoCompanySignUpForm() {
                           </FormLabel>
                           <Input
                             id="postalCode"
-                            placeholder="94105"
                             {...field}
                           />
                           <FormMessage />
@@ -370,7 +364,6 @@ export default function RepoCompanySignUpForm() {
                         </FormLabel>
                         <Input
                           id="state"
-                          placeholder="United States"
                           {...field}
                         />
                         <FormMessage />
@@ -407,7 +400,6 @@ export default function RepoCompanySignUpForm() {
                         </FormLabel>
                         <Input
                           id="fullName"
-                          placeholder="John Doe"
                           {...field}
                         />
                         <FormMessage />
@@ -431,7 +423,6 @@ export default function RepoCompanySignUpForm() {
 
                         <Input
                           id="email"
-                          placeholder="john@gmail.com"
                           {...field}
                         />
                         <FormMessage />
@@ -471,7 +462,6 @@ export default function RepoCompanySignUpForm() {
                         <Input
                           id="phoneNumber"
                           type="tel"
-                          placeholder="(555) 987-6543"
                           value={
                             useCompanyPhone
                               ? form.getValues("companyPhone")
@@ -510,7 +500,6 @@ export default function RepoCompanySignUpForm() {
                         <Input
                           id="password"
                           type="password"
-                          placeholder="******"
                           {...field}
                         />
                         <FormMessage />
@@ -534,7 +523,6 @@ export default function RepoCompanySignUpForm() {
                         <Input
                           id="confirmPassword"
                           type="password"
-                          placeholder="******"
                           {...field}
                         />
                         <FormMessage />
