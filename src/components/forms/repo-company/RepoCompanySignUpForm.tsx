@@ -97,6 +97,9 @@ const formSchema = z
     path: ["confirmPassword"],
   });
 
+type FormSchema = z.infer<typeof formSchema>;
+type FormField = keyof FormSchema;
+
 export default function RepoCompanySignUpForm() {
   const [useCompanyPhone, setUseCompanyPhone] = useState(false);
   const [step, setStep] = useState(1);
@@ -122,7 +125,47 @@ export default function RepoCompanySignUpForm() {
 
   const navigate = useNavigate();
 
-  const nextStep = () => setStep(step + 1);
+  const validateStep = async (currentStep: number) => {
+    let fieldsToValidate: FormField[] = [];
+
+    switch (currentStep) {
+      case 1:
+        fieldsToValidate = [
+          "companyName",
+          "companyPhone",
+          "street",
+          "city",
+          "state",
+          "country",
+          "postalCode",
+        ];
+        break;
+      case 2:
+        fieldsToValidate = ["fullName", "email", "password", "confirmPassword"];
+        if (!useCompanyPhone) {
+          fieldsToValidate.push("phoneNumber");
+        }
+        break;
+      case 3:
+        // No validation needed for notification preferences
+        return true;
+    }
+
+    const result = await form.trigger(fieldsToValidate);
+    if (!result) {
+      toast.error("Please fill in all required fields correctly");
+      return false;
+    }
+    return true;
+  };
+
+  const nextStep = async () => {
+    const isValid = await validateStep(step);
+    if (isValid) {
+      setStep(step + 1);
+    }
+  };
+
   const prevStep = () => setStep(step - 1);
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
@@ -140,7 +183,7 @@ export default function RepoCompanySignUpForm() {
       smsNotification,
       state,
       street,
-      phoneNumber
+      phoneNumber,
     } = values;
 
     const data = {
@@ -225,10 +268,7 @@ export default function RepoCompanySignUpForm() {
                           <Building2 className="h-4 w-4 text-[#3b5998]" />
                           Company Name
                         </FormLabel>
-                        <Input
-                          id="company"
-                          {...field}
-                        />
+                        <Input id="company" {...field} />
                         <FormMessage />
                       </div>
                     )}
@@ -247,10 +287,7 @@ export default function RepoCompanySignUpForm() {
                           <Phone className="h-4 w-4 text-[#3b5998]" />
                           Company Phone
                         </FormLabel>
-                        <Input
-                          id="companyPhone"
-                          {...field}
-                        />
+                        <Input id="companyPhone" {...field} />
                         <FormMessage />
                       </div>
                     )}
@@ -258,7 +295,7 @@ export default function RepoCompanySignUpForm() {
 
                   {/* Company Address  */}
                   <div className="grid grid-cols-1 gap-2 md:grid-cols-2">
-                    {/* Street Address  */}
+                    {/* Street  */}
                     <FormField
                       control={form.control}
                       name="street"
@@ -269,18 +306,15 @@ export default function RepoCompanySignUpForm() {
                             className="flex items-center gap-2"
                           >
                             <MapPinHouse className="h-4 w-4 text-[#3b5998]" />
-                            Street Address
+                            Street
                           </FormLabel>
-                          <Input
-                            id="street"
-                            {...field}
-                          />
+                          <Input id="street" {...field} />
                           <FormMessage />
                         </div>
                       )}
                     />
 
-                    {/* City Address  */}
+                    {/* City  */}
                     <FormField
                       control={form.control}
                       name="city"
@@ -291,12 +325,9 @@ export default function RepoCompanySignUpForm() {
                             className="flex items-center gap-2"
                           >
                             <Building2 className="h-4 w-4 text-[#3b5998]" />
-                            City Address
+                            City
                           </FormLabel>
-                          <Input
-                            id="City"
-                            {...field}
-                          />
+                          <Input id="City" {...field} />
                           <FormMessage />
                         </div>
                       )}
@@ -315,12 +346,9 @@ export default function RepoCompanySignUpForm() {
                             className="flex items-center gap-2"
                           >
                             <FlagTriangleRight className="h-4 w-4 text-[#3b5998]" />
-                            Country Address
+                            Country
                           </FormLabel>
-                          <Input
-                            id="country"
-                            {...field}
-                          />
+                          <Input id="country" {...field} />
                           <FormMessage />
                         </div>
                       )}
@@ -339,17 +367,14 @@ export default function RepoCompanySignUpForm() {
                             <MapIcon className="h-4 w-4 text-[#3b5998]" />
                             Postal Code
                           </FormLabel>
-                          <Input
-                            id="postalCode"
-                            {...field}
-                          />
+                          <Input id="postalCode" {...field} />
                           <FormMessage />
                         </div>
                       )}
                     />
                   </div>
 
-                  {/* State Address */}
+                  {/* State */}
                   <FormField
                     control={form.control}
                     name="state"
@@ -360,12 +385,9 @@ export default function RepoCompanySignUpForm() {
                           className="flex items-center gap-2"
                         >
                           <MapPinned className="h-4 w-4 text-[#3b5998]" />
-                          State Address
+                          State
                         </FormLabel>
-                        <Input
-                          id="state"
-                          {...field}
-                        />
+                        <Input id="state" {...field} />
                         <FormMessage />
                       </div>
                     )}
@@ -398,10 +420,7 @@ export default function RepoCompanySignUpForm() {
                           <User className="h-4 w-4 text-[#3b5998]" />
                           Full Name
                         </FormLabel>
-                        <Input
-                          id="fullName"
-                          {...field}
-                        />
+                        <Input id="fullName" {...field} />
                         <FormMessage />
                       </div>
                     )}
@@ -421,10 +440,7 @@ export default function RepoCompanySignUpForm() {
                           Email
                         </FormLabel>
 
-                        <Input
-                          id="email"
-                          {...field}
-                        />
+                        <Input id="email" {...field} />
                         <FormMessage />
                       </div>
                     )}
@@ -447,9 +463,15 @@ export default function RepoCompanySignUpForm() {
                           <Checkbox
                             id="useCompanyPhone"
                             checked={useCompanyPhone}
-                            onCheckedChange={(checked) =>
-                              setUseCompanyPhone(checked as boolean)
-                            }
+                            onCheckedChange={(checked) => {
+                              setUseCompanyPhone(checked as boolean);
+                              if (checked) {
+                                form.setValue(
+                                  "phoneNumber",
+                                  form.getValues("companyPhone")
+                                );
+                              }
+                            }}
                           />
                           <label
                             htmlFor="useCompanyPhone"
@@ -497,11 +519,7 @@ export default function RepoCompanySignUpForm() {
                           <Lock className="h-4 w-4 text-[#3b5998]" />
                           Password
                         </FormLabel>
-                        <Input
-                          id="password"
-                          type="password"
-                          {...field}
-                        />
+                        <Input id="password" type="password" {...field} />
                         <FormMessage />
                       </div>
                     )}

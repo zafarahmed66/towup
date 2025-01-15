@@ -20,8 +20,30 @@ const editUserSchema = z
     phoneNumber: z.string().regex(/^\d{10}$/, {
       message: "Phone number should be exactly 10 digits.",
     }),
-    password: z.string().optional(),
-    confirmPassword: z.string().optional(),
+    password: z
+      .string()
+      .min(12, {
+        message: "Password should be at least 12 characters long.",
+      })
+      .regex(/[a-z]/, {
+        message: "Password should contain at least one lowercase letter.",
+      })
+      .regex(/[A-Z]/, {
+        message: "Password should contain at least one uppercase letter.",
+      })
+      .optional(),
+    confirmPassword: z
+      .string()
+      .min(12, {
+        message: "Password should be at least 12 characters long.",
+      })
+      .regex(/[a-z]/, {
+        message: "Password should contain at least one lowercase letter.",
+      })
+      .regex(/[A-Z]/, {
+        message: "Password should contain at least one uppercase letter.",
+      })
+      .optional(),
   })
   .refine((data) => !data.password || data.password === data.confirmPassword, {
     message: "Passwords don't match",

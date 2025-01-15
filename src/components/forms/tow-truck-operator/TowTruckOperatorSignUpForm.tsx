@@ -6,13 +6,20 @@ import { useForm } from "react-hook-form";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { User, Mail, Phone, Lock, Building2, Bell } from "lucide-react";
+import { User, Mail, Phone, Lock, Building2, Bell, MapPin } from "lucide-react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { Form, FormField, FormLabel, FormMessage } from "@/components/ui/form";
 import apiClient from "@/controller/axiosController";
 import { toast } from "react-toastify";
 import { AxiosError } from "axios";
 import { Switch } from "@/components/ui/switch";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 const formSchema = z
   .object({
@@ -57,6 +64,9 @@ const formSchema = z
     phoneNumber: z.string().regex(/^\d{10}$/, {
       message: "Phone number should be exactly 10 digits.",
     }),
+    operationalRegion: z.string().min(2, {
+      message: "Operational Region is required",
+    }),
     emailNotification: z.boolean().default(true),
     smsNotification: z.boolean().default(true),
     pushNotification: z.boolean().default(true),
@@ -66,14 +76,14 @@ const formSchema = z
     path: ["confirmPassword"],
   });
 
+type FormSchema = z.infer<typeof formSchema>;
+type FormField = keyof FormSchema;
+
 export default function TowTruckOperatorSignUpForm() {
   const [step, setStep] = useState(1);
   const [searchParams] = useSearchParams();
   const email = searchParams.get("email");
   const token = searchParams.get("token");
-
-  console.log(email);
-  console.log(token);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -83,6 +93,7 @@ export default function TowTruckOperatorSignUpForm() {
       fullName: "",
       password: "",
       phoneNumber: "",
+      operationalRegion: "",
       emailNotification: true,
       pushNotification: true,
       smsNotification: true,
@@ -91,7 +102,44 @@ export default function TowTruckOperatorSignUpForm() {
 
   const navigate = useNavigate();
 
-  const nextStep = () => setStep(step + 1);
+  const validateStep = async (currentStep: number) => {
+    let fieldsToValidate: FormField[] = [];
+
+    switch (currentStep) {
+      case 1:
+        fieldsToValidate = ["operatorName", "licenseNumber"];
+        break;
+      case 2:
+        fieldsToValidate = [
+          "fullName",
+          "phoneNumber",
+          "password",
+          "confirmPassword",
+        ];
+
+        break;
+      case 3:
+        fieldsToValidate = ["operationalRegion"];
+        break;
+
+      case 4:
+        return true;
+    }
+
+    const result = await form.trigger(fieldsToValidate);
+    if (!result) {
+      toast.error("Please fill in all required fields correctly");
+      return false;
+    }
+    return true;
+  };
+
+  const nextStep = async () => {
+    const isValid = await validateStep(step);
+    if (isValid) {
+      setStep(step + 1);
+    }
+  };
   const prevStep = () => setStep(step - 1);
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
@@ -104,12 +152,14 @@ export default function TowTruckOperatorSignUpForm() {
       emailNotification,
       pushNotification,
       smsNotification,
+      operationalRegion,
     } = values;
 
     const data = {
       token,
       operatorName,
       licenseNumber,
+      operationalRegion,
       user: {
         email,
         fullname: fullName,
@@ -181,10 +231,7 @@ export default function TowTruckOperatorSignUpForm() {
                           <Building2 className="h-4 w-4 text-[#3b5998]" />
                           Operator Name
                         </FormLabel>
-                        <Input
-                          id="operatorName"
-                          {...field}
-                        />
+                        <Input id="operatorName" {...field} />
                         <FormMessage />
                       </div>
                     )}
@@ -202,10 +249,7 @@ export default function TowTruckOperatorSignUpForm() {
                           <Phone className="h-4 w-4 text-[#3b5998]" />
                           License Number
                         </FormLabel>
-                        <Input
-                          id="licenseNumber"
-                          {...field}
-                        />
+                        <Input id="licenseNumber" {...field} />
                         <FormMessage />
                       </div>
                     )}
@@ -238,10 +282,7 @@ export default function TowTruckOperatorSignUpForm() {
                           <User className="h-4 w-4 text-[#3b5998]" />
                           Full Name
                         </FormLabel>
-                        <Input
-                          id="fullName"
-                          {...field}
-                        />
+                        <Input id="fullName" {...field} />
                         <FormMessage />
                       </div>
                     )}
@@ -261,10 +302,7 @@ export default function TowTruckOperatorSignUpForm() {
                           Phone Number
                         </FormLabel>
 
-                        <Input
-                          id="phoneNumber"
-                          {...field}
-                        />
+                        <Input id="phoneNumber" {...field} />
                         <FormMessage />
                       </div>
                     )}
@@ -283,11 +321,7 @@ export default function TowTruckOperatorSignUpForm() {
                           <Lock className="h-4 w-4 text-[#3b5998]" />
                           Password
                         </FormLabel>
-                        <Input
-                          id="password"
-                          type="password"
-                          {...field}
-                        />
+                        <Input id="password" type="password" {...field} />
                         <FormMessage />
                       </div>
                     )}
@@ -336,6 +370,65 @@ export default function TowTruckOperatorSignUpForm() {
               )}
 
               {step === 3 && (
+                <>
+                  <h3 className="text-lg font-semibold text-[#2B4380] mb-4">
+                    Operational Regions
+                  </h3>
+                  <FormField
+                    control={form.control}
+                    name="operationalRegion"
+                    render={() => (
+                      <div className="space-y-4">
+                        <div className="space-y-2">
+                          <FormLabel
+                            htmlFor="region"
+                            className="flex items-center gap-2"
+                          >
+                            <MapPin className="h-4 w-4 text-[#3b5998]" />
+                            Select Region
+                          </FormLabel>
+                          <Select
+                            onValueChange={(value) => {
+                              form.setValue("operationalRegion", value);
+                            }}
+                          >
+                            <SelectTrigger>
+                              <SelectValue placeholder="Select a region" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="NEW_YORK_METRO">
+                                New York Region
+                              </SelectItem>
+                              <SelectItem value="SAN_FRANCISCO_BAY">
+                                San Francisco Region
+                              </SelectItem>
+                            </SelectContent>
+                          </Select>
+                          <FormMessage />
+                        </div>
+                      </div>
+              )}
+                  />
+                  <div className="flex flex-col space-y-2 sm:flex-row sm:space-x-2 sm:space-y-0">
+                    <Button
+                      type="button"
+                      onClick={prevStep}
+                      className="w-1/2 text-gray-800 bg-gray-300 hover:bg-gray-400"
+                    >
+                      Back
+                    </Button>
+                    <Button
+                      type="button"
+                      onClick={nextStep}
+                      className="w-1/2 bg-[#3b5998] hover:bg-[#344e86] text-white"
+                    >
+                      Next
+                    </Button>
+                  </div>
+                </>
+              )}
+
+              {step === 4 && (
                 <>
                   <h3 className="text-lg font-semibold text-[#2B4380] mb-4">
                     Configure Notifications
