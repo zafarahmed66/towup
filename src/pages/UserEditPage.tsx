@@ -10,10 +10,21 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import api from "@/controller/axiosController";
 import { toast } from "react-toastify";
 import { UserData } from "./ProfilePage";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
-// Zod schema for form validation
-const editUserSchema = z
+// Define the base schema
+const baseSchema = z.object({
+  fullName: z.string().min(1, "Fullname is required"),
+  email: z.string().email("Invalid email format"),
+  phoneNumber: z.string().regex(/^\d{10}$/, {
+    message: "Phone number should be exactly 10 digits.",
+  }),
+  password: z.string().optional(),
+  confirmPassword: z.string().optional(),
+});
+
+// Schema with password validation
+const schemaWithPassword = z
   .object({
     fullName: z.string().min(1, "Fullname is required"),
     email: z.string().email("Invalid email format"),
@@ -30,8 +41,7 @@ const editUserSchema = z
       })
       .regex(/[A-Z]/, {
         message: "Password should contain at least one uppercase letter.",
-      })
-      .optional(),
+      }),
     confirmPassword: z
       .string()
       .min(12, {
@@ -42,39 +52,48 @@ const editUserSchema = z
       })
       .regex(/[A-Z]/, {
         message: "Password should contain at least one uppercase letter.",
-      })
-      .optional(),
+      }),
   })
-  .refine((data) => !data.password || data.password === data.confirmPassword, {
+  .refine((data) => data.password === data.confirmPassword, {
     message: "Passwords don't match",
     path: ["confirmPassword"],
   });
 
-type EditUserFormValues = z.infer<typeof editUserSchema>;
+type FormValues = z.infer<typeof schemaWithPassword>;
 
 export default function EditUserProfile() {
   const [isEditingPassword, setIsEditingPassword] = useState(false);
   const location = useLocation();
   const state = location.state as UserData;
+  const navigate = useNavigate();
 
-  // Initialize react-hook-form with zodResolver
   const {
     register,
     handleSubmit,
     formState: { errors },
-  } = useForm<EditUserFormValues>({
-    resolver: zodResolver(editUserSchema),
+    reset,
+  } = useForm<FormValues>({
+    resolver: zodResolver(isEditingPassword ? schemaWithPassword : baseSchema),
     defaultValues: {
       fullName: state.user.fullname,
       email: state.user.email,
       phoneNumber: state.user.phoneNumber.toString(),
+      password: "",
+      confirmPassword: "",
     },
   });
 
-  const navigate = useNavigate();
+  useEffect(() => {
+    reset({
+      fullName: state.user.fullname,
+      email: state.user.email,
+      phoneNumber: state.user.phoneNumber.toString(),
+      password: "",
+      confirmPassword: "",
+    });
+  }, [isEditingPassword, reset, state.user]);
 
-  // Submit function
-  const onSubmit = async (data: EditUserFormValues) => {
+  const onSubmit = async (data: FormValues) => {
     try {
       const updatedData: {
         fullname: string;
@@ -87,7 +106,6 @@ export default function EditUserProfile() {
         phoneNumber: Number(data.phoneNumber),
       };
 
-      // Add password only if it is being edited
       if (isEditingPassword && data.password) {
         updatedData.password = data.password;
       }
@@ -117,7 +135,6 @@ export default function EditUserProfile() {
               Edit Profile
             </h2>
             <form className="space-y-4" onSubmit={handleSubmit(onSubmit)}>
-              {/* Full Name */}
               <div className="space-y-2">
                 <Label htmlFor="fullName" className="flex items-center gap-2">
                   <User className="h-4 w-4 text-[#3b5998]" />
@@ -135,7 +152,6 @@ export default function EditUserProfile() {
                 )}
               </div>
 
-              {/* Email */}
               <div className="space-y-2">
                 <Label htmlFor="email" className="flex items-center gap-2">
                   <Mail className="h-4 w-4 text-[#3b5998]" />
@@ -152,7 +168,6 @@ export default function EditUserProfile() {
                 )}
               </div>
 
-              {/* Phone Number */}
               <div className="space-y-2">
                 <Label
                   htmlFor="phoneNumber"
@@ -174,7 +189,6 @@ export default function EditUserProfile() {
                 )}
               </div>
 
-              {/* Password Section */}
               <div className="space-y-2">
                 <div className="flex items-center justify-between">
                   <Label htmlFor="password" className="flex items-center gap-2">
@@ -189,33 +203,34 @@ export default function EditUserProfile() {
                     <Pencil />
                   </button>
                 </div>
-                <Input
-                  id="password"
-                  type="password"
-                  disabled={!isEditingPassword}
-                  {...register("password")}
-                  placeholder="Enter new password"
-                />
-                {errors.password && (
-                  <p className="text-sm text-red-500">
-                    {errors.password.message}
-                  </p>
+                {isEditingPassword && (
+                  <>
+                    <Input
+                      id="password"
+                      type="password"
+                      {...register("password")}
+                      placeholder="Enter new password"
+                    />
+                    {errors.password && (
+                      <p className="text-sm text-red-500">
+                        {errors.password.message}
+                      </p>
+                    )}
+                  </>
                 )}
               </div>
 
               {isEditingPassword && (
                 <div className="space-y-2">
-                  <div className="flex items-center justify-between">
-                    <Label
-                      htmlFor="password"
-                      className="flex items-center gap-2"
-                    >
-                      <LockIcon className="h-4 w-4 text-[#3b5998]" />
-                      Confirm Password
-                    </Label>
-                  </div>
+                  <Label
+                    htmlFor="confirmPassword"
+                    className="flex items-center gap-2"
+                  >
+                    <LockIcon className="h-4 w-4 text-[#3b5998]" />
+                    Confirm Password
+                  </Label>
                   <Input
-                    id="password"
+                    id="confirmPassword"
                     type="password"
                     {...register("confirmPassword")}
                     placeholder="Confirm Password"
@@ -227,6 +242,7 @@ export default function EditUserProfile() {
                   )}
                 </div>
               )}
+
               <Button
                 type="submit"
                 className="w-full bg-[#3b5998] hover:bg-[#344e86] text-white"

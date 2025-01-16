@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import {
   Bell,
   MapPin,
@@ -12,6 +12,8 @@ import {
   Lock,
   Settings,
   Truck,
+  Camera,
+  FileText,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -22,6 +24,7 @@ import { InviteUser } from "@/components/InviteUser";
 
 export interface UserData {
   companyName: string;
+  profilePictureUrl?: string | Blob;
   phoneNumber: string;
   address: {
     street: string;
@@ -48,8 +51,11 @@ export interface UserData {
 }
 
 export default function ProfilePage() {
+  const [documents, setDocuments] = useState([]);
   const [data, setData] = useState<UserData>();
   const [isLoading, setIsLoading] = useState(true);
+  const [uploading, setUploading] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const [userId, _setUserId, removeUserId] = useCookie("userId", "");
   const [_token, _setToken, removeToken] = useCookie("token", "");
   const [_expiresIn, _setExpiresIn, removeExpiresIn] = useCookie(
@@ -59,6 +65,42 @@ export default function ProfilePage() {
   const [userType, _setUserType, removeUserType] = useCookie("userType", "");
 
   const navigate = useNavigate();
+
+  const handleImageClick = () => {
+    fileInputRef.current?.click();
+  };
+
+  const handleImageChange = async (
+    event: React.ChangeEvent<HTMLInputElement>
+  ) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    const formData = new FormData();
+    formData.append("file", file);
+
+    setUploading(true);
+    try {
+      const endpoint = data?.profilePictureUrl
+        ? "/api/profile-pictures/update"
+        : "/api/profile-pictures/upload";
+
+      await api.post(endpoint, formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      });
+
+      const response = await api.get(
+        `/api/${userType === "FLEET_OWNER" ? "fleetowners" : "repo-companies"}/${userId}`
+      );
+      setData(response.data);
+    } catch (error) {
+      console.error("Error uploading profile picture:", error);
+    } finally {
+      setUploading(false);
+    }
+  };
 
   const onLogOut = (event: any) => {
     event.preventDefault();
@@ -76,6 +118,16 @@ export default function ProfilePage() {
           `/api/${userType === "FLEET_OWNER" ? "fleetowners" : "repo-companies"}/${userId}`
         );
         setData(response.data);
+        if (userType === "REPO_COMPANY") {
+          const documentsResponse = await api.get(
+            `/api/repo-companies/documents/me`
+          );
+          if (response) {
+            setDocuments(documentsResponse.data || []);
+          } else {
+            setDocuments([]);
+          }
+        }
       } catch (error) {
         console.error("Error fetching user data:", error);
       } finally {
@@ -94,10 +146,38 @@ export default function ProfilePage() {
         <Card className="overflow-hidden shadow-lg">
           <div className="bg-gradient-to-r from-[#3b5998] to-[#2B4380] p-6">
             <div className="flex flex-col items-center gap-4 sm:flex-row sm:gap-6">
-              <div className="p-1 bg-white rounded-full shadow-md">
-                <div className="h-24 w-24 rounded-full bg-[#4CAF50] text-white flex items-center justify-center text-3xl font-bold">
-                  {userType === "FLEET_OWNER" ? "FO" : "RC"}
+              <div
+                className="relative cursor-pointer group"
+                onClick={handleImageClick}
+              >
+                <input
+                  type="file"
+                  ref={fileInputRef}
+                  className="hidden"
+                  accept="image/*"
+                  onChange={handleImageChange}
+                />
+                <div className="p-1 bg-white rounded-full shadow-md">
+                  {data?.profilePictureUrl ? (
+                    <img
+                      src={data.profilePictureUrl as string}
+                      alt="Profile"
+                      className="object-cover w-24 h-24 rounded-full"
+                    />
+                  ) : (
+                    <div className="h-24 w-24 rounded-full bg-[#4CAF50] text-white flex items-center justify-center text-3xl font-bold">
+                      {userType === "FLEET_OWNER" ? "FO" : "RC"}
+                    </div>
+                  )}
                 </div>
+                <div className="absolute inset-0 flex items-center justify-center transition-opacity bg-black bg-opacity-50 rounded-full opacity-0 group-hover:opacity-100">
+                  <Camera className="w-6 h-6 text-white" />
+                </div>
+                {uploading && (
+                  <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50 rounded-full">
+                    <div className="w-6 h-6 border-2 border-white rounded-full border-t-transparent animate-spin"></div>
+                  </div>
+                )}
               </div>
               <div>
                 <h2 className="text-3xl font-bold text-white">
@@ -112,7 +192,7 @@ export default function ProfilePage() {
               <div className="h-48 bg-gray-300 rounded-lg animate-pulse"></div>
               <div className="bg-gray-300 rounded-lg h-36 animate-pulse"></div>
             </div>
-           ) : (
+          ) : (
             <CardContent className="pt-6 space-y-8">
               {/* Account Details Section */}
               <div className="p-4 rounded-lg shadow-sm bg-gray-50 sm:p-6">
@@ -249,6 +329,44 @@ export default function ProfilePage() {
                     </div>
                   </div>
                 </>
+              )}
+
+              {userType === "REPO_COMPANY" && (
+                <div className="p-4 rounded-lg shadow-sm bg-gray-50 sm:p-6">
+                  <div className="flex items-center justify-between mb-4">
+                    <h3 className="text-xl font-semibold text-[#2B4380]">
+                      Official Documents
+                    </h3>
+                    <Link to="/profile/documents/edit">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="bg-[#3b5998] text-white hover:bg-[#344e86]"
+                      >
+                        <Edit className="w-4 h-4 mr-2" />
+                        Edit
+                      </Button>
+                    </Link>
+                  </div>
+                  <div className="grid gap-3">
+                    {documents.map((doc, index) => (
+                      <div
+                        key={index}
+                        className="flex items-center justify-between"
+                      >
+                        <div className="flex items-center gap-3 text-sm">
+                          <FileText className="h-5 w-5 text-[#3b5998]" />
+                          <span>{doc.name}</span>
+                        </div>
+                        {doc.expiration && (
+                          <span className="text-sm text-gray-500">
+                            Expires: {doc.expiration}
+                          </span>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                </div>
               )}
 
               {userType === "REPO_COMPANY" && (

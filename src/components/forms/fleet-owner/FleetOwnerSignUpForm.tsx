@@ -36,6 +36,7 @@ import { toast } from "react-toastify";
 import { AxiosError } from "axios";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
+import { Data } from "@/types/types";
 
 const formSchema = z
   .object({
@@ -213,33 +214,36 @@ export default function FleetOwnerSignupPage() {
       phoneNumber,
     } = values;
 
-    const data = {
-      companyName,
-      phoneNumber: Number(companyPhone),
-      operationalRegions: selectedRegions,
-      address: {
-        street,
-        city,
-        state,
-        postalCode,
-        country,
-      },
-      telematicSettings: {
-        telematicProvider: telematicsProvider,
-        telematicApiKey: apiKey,
-      },
-      user: {
-        email,
-        fullname: fullName,
-        password,
-        phoneNumber: useCompanyPhone ? companyPhone : phoneNumber,
-        appNotificationSetting: {
-          emailNotificationEnabled: emailNotification,
-          smsNotificationEnabled: smsNotification,
-          appNotificationEnabled: pushNotification,
-        },
-      },
-    };
+const data : Data = {
+  companyName,
+  phoneNumber: Number(companyPhone),
+  operationalRegions: selectedRegions,
+  address: {
+    street,
+    city,
+    state,
+    postalCode,
+    country,
+  },
+  user: {
+    email,
+    fullname: fullName,
+    password,
+    phoneNumber: useCompanyPhone ? companyPhone : phoneNumber,
+    appNotificationSetting: {
+      emailNotificationEnabled: emailNotification,
+      smsNotificationEnabled: smsNotification,
+      appNotificationEnabled: pushNotification,
+    },
+  },
+};
+
+if (telematicsProvider && apiKey) {
+  data.telematicSettings = {
+    telematicProvider: telematicsProvider,
+    telematicApiKey: apiKey,
+  };
+}
 
     try {
       await apiClient.post("/api/fleetowners/signup", data);
@@ -261,7 +265,6 @@ export default function FleetOwnerSignupPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     const isValid = await form.trigger();
-    console.log(form.getValues());
 
     if (isValid) {
       form.handleSubmit(onSubmit)(e);

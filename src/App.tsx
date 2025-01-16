@@ -16,6 +16,7 @@ import EditTelematicsInfo from "./pages/EditTelematicsInfo";
 import ApproveUsersPage from "./pages/ApproveUsersPage";
 import TowTruckSignup from "./pages/TowTruckSignup";
 import EditOperationalRegions from "./pages/EditRegion";
+import EditDocumentsPage from "./pages/EditDocumentPage";
 
 function App() {
   return (
@@ -35,6 +36,7 @@ function App() {
         <Route path="/profile/account/edit" element={<EditAccountDetails />} />
         <Route path="/profile/user/edit" element={<EditUserProfile />} />
         <Route path="/profile/regions/edit" element={<EditOperationalRegions />} />
+        <Route path="/profile/documents/edit" element={<EditDocumentsPage />} />
         <Route
           path="/profile/telematics/edit"
           element={<EditTelematicsInfo />}
