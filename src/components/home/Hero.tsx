@@ -94,7 +94,7 @@ const Hero = () => {
           Save time, reduce costs, and improve recovery rates.
         </HeroSubtitle>
         <CTAButtons>
-          <PrimaryButton to="/signup?type=fleet">Start Free Trial</PrimaryButton>
+          <PrimaryButton to="/fleetowner/signup">Start Free Trial</PrimaryButton>
           <SecondaryButton to="#demo">Watch Demo</SecondaryButton>
         </CTAButtons>
       </HeroContent>

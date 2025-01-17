@@ -11,10 +11,10 @@ import {
 } from "@/components/ui/select";
 import { MapPin, ArrowLeft, X } from "lucide-react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { UserData } from "./ProfilePage";
-import useCookie from "@/hooks/useCookie";
+import { profileType, UserData } from "./ProfilePage";
 import { toast } from "react-toastify";
 import api from "@/controller/axiosController";
+import { useAuth } from "@/context/AuthContext";
 
 export default function EditOperationalRegions() {
   const location = useLocation();
@@ -22,7 +22,7 @@ export default function EditOperationalRegions() {
   const [selectedRegions, setSelectedRegions] = useState<string[]>(
     state.operationalRegions || []
   );
-  const [userType] = useCookie("userType", "");
+  const { userType } = useAuth();
 
   const navigate = useNavigate();
 
@@ -38,7 +38,11 @@ export default function EditOperationalRegions() {
         updatedData
       );
       toast.success("Account details updated successfully!");
-      navigate("/profile");
+      if (userType) {
+        navigate(`${profileType[userType]}`);
+      } else {
+        navigate("/");
+      }
     } catch (error) {
       console.log(error);
       toast.error("Failed to update account details.");
@@ -59,7 +63,7 @@ export default function EditOperationalRegions() {
     <div className="min-h-screen bg-[#2B4380] p-4 md:p-8 w-screen">
       <div className="max-w-2xl px-4 mx-auto sm:px-6 lg:px-8">
         <Link
-          to="/profile"
+          to={`${profileType[userType!]}`}
           className="flex items-center mb-4 text-white hover:underline"
         >
           <ArrowLeft className="w-4 h-4 mr-2" />

@@ -8,6 +8,8 @@ import { ArrowLeft, FileText, Calendar } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
 import api from "@/controller/axiosController";
 import { toast } from "react-toastify";
+import { profileType } from "./ProfilePage";
+import { useAuth } from "@/context/AuthContext";
 
 type Document = {
   file: File | null;
@@ -18,6 +20,8 @@ type Document = {
 export default function EditDocumentPage() {
   const location = useLocation();
   const state = location.state;
+
+  const { userType } = useAuth();
 
   const [document, setDocument] = useState<Document>({
     file: null,
@@ -66,7 +70,7 @@ export default function EditDocumentPage() {
     <div className="min-h-screen bg-[#2B4380] p-4 md:p-8 w-screen">
       <div className="max-w-2xl px-4 mx-auto sm:px-6 lg:px-8">
         <Link
-          to="/profile"
+          to={`${profileType[userType!]}`}
           className="flex items-center mb-4 text-white hover:underline"
         >
           <ArrowLeft className="w-4 h-4 mr-2" />
@@ -81,7 +85,6 @@ export default function EditDocumentPage() {
           <CardContent className="p-6">
             <form onSubmit={handleSubmit} className="space-y-6">
               <div className="space-y-4">
-               
                 <div className="space-y-2">
                   <Label
                     htmlFor="documentFile"

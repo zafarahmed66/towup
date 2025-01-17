@@ -1,4 +1,4 @@
-import styled from 'styled-components';
+import styled from "styled-components";
 
 const Section = styled.section`
   padding: 6rem 2rem;
@@ -27,13 +27,13 @@ const Subtitle = styled.p`
 
 const ApplyButton = styled.a`
   display: inline-block;
-  background: #4CAF50;
+  background: #4caf50;
   color: white;
   padding: 1rem 2rem;
   border-radius: 8px;
   text-decoration: none;
   font-weight: 500;
-  
+
   &:hover {
     background: #45a049;
   }
@@ -51,27 +51,27 @@ const VideoCard = styled.div`
   border-radius: 12px;
   padding: 2.5rem 2rem;
   transition: transform 0.3s;
-  
+
   &:hover {
     transform: translateY(-5px);
     background: white;
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
   }
-  
+
   .step {
-    color: #4CAF50;
+    color: #4caf50;
     font-weight: 600;
     font-size: 1.1rem;
     display: block;
     margin-bottom: 1rem;
   }
-  
+
   h3 {
     color: #1e3c72;
     margin-bottom: 1rem;
     font-size: 1.5rem;
   }
-  
+
   p {
     color: #666;
     line-height: 1.6;
@@ -84,26 +84,36 @@ const RepoCompanies = () => {
       <Container>
         <Title>Join Our Network of Recovery Professionals</Title>
         <Subtitle>
-          Partner with TowUp to grow your business and access a steady stream of recovery assignments
+          Partner with TowUp to grow your business and access a steady stream of
+          recovery assignments
         </Subtitle>
         <VideoGrid>
           <VideoCard>
             <span className="step">01</span>
             <h3>Increased Revenue</h3>
-            <p>Access a larger customer base and receive regular recovery assignments</p>
+            <p>
+              Access a larger customer base and receive regular recovery
+              assignments
+            </p>
           </VideoCard>
           <VideoCard>
             <span className="step">02</span>
             <h3>Streamlined Operations</h3>
-            <p>Manage all your assignments, documentation, and payments in one place with our user-friendly platform.</p>
+            <p>
+              Manage all your assignments, documentation, and payments in one
+              place with our user-friendly platform.
+            </p>
           </VideoCard>
           <VideoCard>
             <span className="step">03</span>
             <h3>Professional Network</h3>
-            <p>Join our network of certified recovery professionals and build long-term relationships with major fleet operators.</p>
+            <p>
+              Join our network of certified recovery professionals and build
+              long-term relationships with major fleet operators.
+            </p>
           </VideoCard>
         </VideoGrid>
-        <ApplyButton href="/signup?type=repo">Apply Now</ApplyButton>
+        <ApplyButton href="/repocompany/signup">Apply Now</ApplyButton>
       </Container>
     </Section>
   );

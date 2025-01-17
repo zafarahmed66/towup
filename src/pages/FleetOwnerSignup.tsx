@@ -6,14 +6,9 @@ import {
   NavLinks,
   PageWrapper,
 } from "../components/layout/Global";
-import { useSearchParams } from "react-router-dom";
 import FleetOwnerSignupForm from "../components/forms/fleet-owner/FleetOwnerSignUpForm";
-import RepoCompanySignupForm from "../components/forms/repo-company/RepoCompanySignUpForm";
 
-const SignupPage = () => {
-  const [searchParams] = useSearchParams();
-  const type = searchParams.get("type") || "fleet";
-
+const FleetOwnerSignupPage = () => {
   return (
     <>
       <GlobalStyle />
@@ -25,15 +20,11 @@ const SignupPage = () => {
           </NavLinks>
         </Navigation>
         <MainContent>
-          {type === "fleet" ? (
-            <FleetOwnerSignupForm />
-          ) : (
-            <RepoCompanySignupForm />
-          )}
+          <FleetOwnerSignupForm />
         </MainContent>
       </PageWrapper>
     </>
   );
 };
 
-export default SignupPage;
+export default FleetOwnerSignupPage;

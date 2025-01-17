@@ -106,7 +106,7 @@ const Navigation = () => {
         ) : (
           <>
             <Link to="/login">Login</Link>
-            <SignUpButton to="/signup">Sign Up</SignUpButton>
+            <SignUpButton to="/fleetowner/signup">Sign Up</SignUpButton>
           </>
         )}
       </NavLinks>

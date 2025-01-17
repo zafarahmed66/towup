@@ -17,10 +17,13 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import api from "@/controller/axiosController";
 import useCookie from "@/hooks/useCookie";
 import { InviteUser } from "@/components/InviteUser";
+import { UserType } from "@/types/types";
+import { toast } from "react-toastify";
+import { useAuth } from "@/context/AuthContext";
 
 export interface UserData {
   companyName: string;
@@ -50,21 +53,30 @@ export interface UserData {
   operationalRegions?: string[];
 }
 
+export const profileType = {
+  REPO_COMPANY: "/repocompany/profile",
+  FLEET_OWNER: "/fleetowner/profile",
+  TOW_OPERATOR: "/towtruckop/profile",
+};
+
 export default function ProfilePage() {
   const [documents, setDocuments] = useState([]);
   const [data, setData] = useState<UserData>();
   const [isLoading, setIsLoading] = useState(true);
   const [uploading, setUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const [userId, _setUserId, removeUserId] = useCookie("userId", "");
-  const [_token, _setToken, removeToken] = useCookie("token", "");
-  const [_expiresIn, _setExpiresIn, removeExpiresIn] = useCookie(
-    "expiresIn",
-    ""
-  );
-  const [userType, _setUserType, removeUserType] = useCookie("userType", "");
+
+  const { userType, userId, onLogOut } = useAuth();
 
   const navigate = useNavigate();
+  const location = useLocation();
+
+  useEffect(() => {
+    if (userType && location.pathname !== profileType[userType]) {
+      toast.error("Unauthorized");
+      navigate("/");
+    }
+  }, [userType, location.pathname, navigate]);
 
   const handleImageClick = () => {
     fileInputRef.current?.click();
@@ -102,14 +114,7 @@ export default function ProfilePage() {
     }
   };
 
-  const onLogOut = (event: any) => {
-    event.preventDefault();
-    removeToken();
-    removeExpiresIn();
-    removeUserType();
-    removeUserId();
-    navigate("/login");
-  };
+
 
   useEffect(() => {
     const fetchUserType = async () => {

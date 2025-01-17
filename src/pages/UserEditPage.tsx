@@ -9,8 +9,9 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import api from "@/controller/axiosController";
 import { toast } from "react-toastify";
-import { UserData } from "./ProfilePage";
+import { profileType, UserData } from "./ProfilePage";
 import { useState, useEffect } from "react";
+import { useAuth } from "@/context/AuthContext";
 
 // Define the base schema
 const baseSchema = z.object({
@@ -66,6 +67,7 @@ export default function EditUserProfile() {
   const location = useLocation();
   const state = location.state as UserData;
   const navigate = useNavigate();
+  const { userType } = useAuth();
 
   const {
     register,
@@ -112,7 +114,11 @@ export default function EditUserProfile() {
 
       await api.post("/users/me/update", updatedData);
       toast.success("Profile updated successfully!");
-      navigate("/profile");
+      if (userType) {
+        navigate(`${profileType[userType]}`);
+      } else {
+        navigate("/");
+      }
     } catch (error) {
       toast.error("Failed to update profile.");
       console.error(error);
@@ -123,7 +129,7 @@ export default function EditUserProfile() {
     <div className="min-h-screen bg-[#2B4380] p-4 md:p-8 w-screen">
       <div className="max-w-2xl px-4 mx-auto sm:px-6 lg:px-8">
         <Link
-          to="/profile"
+          to={`${profileType[userType!]}`}
           className="flex items-center mb-4 text-white hover:underline"
         >
           <ArrowLeft className="w-4 h-4 mr-2" />

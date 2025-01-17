@@ -6,8 +6,9 @@ import { Bell, Mail, MessageSquare, ArrowLeft } from "lucide-react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useState } from "react";
 import { toast } from "react-toastify";
-import { UserData } from "./ProfilePage";
+import { profileType, UserData } from "./ProfilePage";
 import api from "@/controller/axiosController";
+import { useAuth } from "@/context/AuthContext";
 
 export default function ConfigureNotifications() {
   const location = useLocation();
@@ -25,6 +26,7 @@ export default function ConfigureNotifications() {
   );
 
   const navigate = useNavigate();
+  const { userType } = useAuth();
 
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
@@ -39,7 +41,11 @@ export default function ConfigureNotifications() {
 
       await api.post("/users/me/update", updatedData);
       toast.success("Notification preferences saved successfully!");
-      navigate("/profile");
+      if (userType) {
+        navigate(`${profileType[userType]}`);
+      } else {
+        navigate("/");
+      }
     } catch (error) {
       toast.error("Failed to update profile.");
       console.error(error);
@@ -50,7 +56,7 @@ export default function ConfigureNotifications() {
     <div className="min-h-screen bg-[#2B4380] p-4 md:p-8 w-screen">
       <div className="max-w-2xl px-4 mx-auto sm:px-6 lg:px-8">
         <Link
-          to="/profile"
+          to={`${profileType[userType!]}`}
           className="flex items-center mb-4 text-white hover:underline"
         >
           <ArrowLeft className="w-4 h-4 mr-2" />

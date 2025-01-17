@@ -11,8 +11,8 @@ import { Building2, Phone, MapPin, ArrowLeft } from "lucide-react";
 import { Link } from "react-router-dom";
 import api from "@/controller/axiosController";
 import { toast } from "react-toastify";
-import useCookie from "@/hooks/useCookie";
-import { UserData } from "./ProfilePage";
+import { profileType, UserData } from "./ProfilePage";
+import { useAuth } from "@/context/AuthContext";
 
 const editAccountSchema = z.object({
   company: z.string().min(1, "Company name is required"),
@@ -36,7 +36,7 @@ export default function EditAccountDetails() {
   const location = useLocation();
   const state = location.state as UserData;
 
-  const [userType] = useCookie("userType", "");
+  const { userType } = useAuth();
 
   const {
     companyName,
@@ -63,38 +63,41 @@ export default function EditAccountDetails() {
 
   const navigate = useNavigate();
 
-const onSubmit = async (data: EditAccountFormValues) => {
-  try {
-    const updatedData: any = {
-      companyName: data.company,
-      phoneNumber: Number(data.phone),
-      address: {
-        street: data.street,
-        city: data.city,
-        state: data.state,
-        postalCode: data.postalCode,
-        country: data.country,
-      },
-    };
+  const onSubmit = async (data: EditAccountFormValues) => {
+    try {
+      const updatedData: any = {
+        companyName: data.company,
+        phoneNumber: Number(data.phone),
+        address: {
+          street: data.street,
+          city: data.city,
+          state: data.state,
+          postalCode: data.postalCode,
+          country: data.country,
+        },
+      };
 
-
-    await api.post(
-      `/api/${userType === "FLEET_OWNER" ? "fleetowners" : "repo-companies"}/me/update`,
-      updatedData
-    );
-    toast.success("Account details updated successfully!");
-    navigate("/profile");
-  } catch (error) {
-    console.error(error);
-    toast.error("Failed to update account details.");
-  }
-};
+      await api.post(
+        `/api/${userType === "FLEET_OWNER" ? "fleetowners" : "repo-companies"}/me/update`,
+        updatedData
+      );
+      toast.success("Account details updated successfully!");
+      if (userType) {
+        navigate(`${profileType[userType]}`);
+      } else {
+        navigate("/");
+      }
+    } catch (error) {
+      console.error(error);
+      toast.error("Failed to update account details.");
+    }
+  };
 
   return (
     <div className="min-h-screen bg-[#2B4380] p-4 md:p-8 w-screen">
       <div className="max-w-2xl px-4 mx-auto sm:px-6 lg:px-8">
         <Link
-          to="/profile"
+          to={`${profileType[userType!]}`}
           className="flex items-center mb-4 text-white hover:underline"
         >
           <ArrowLeft className="w-4 h-4 mr-2" />

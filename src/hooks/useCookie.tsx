@@ -1,15 +1,8 @@
 import { useState } from "react";
 import Cookies from "js-cookie";
+import { CookieAttributes } from "@/types/types";
 
 
-type CookieAttributes = {
-  expires?: number | Date;
-  path?: string;
-  domain?: string;
-  secure?: boolean;
-  sameSite?: "strict" | "lax" | "none";
-  userType?: string;
-};
 
 function useCookie<T = string>(key: string, defaultValue: T) {
   const [cookie, setCookieState] = useState<T>(() => {
