@@ -10,7 +10,7 @@ const LoginPage = () => {
         <Navigation>
           <Logo href="/">TowUp</Logo>
           <NavLinks>
-            <a href="/signup">Signup</a>
+            <a href="/fleetowner/signup">Signup</a>
           </NavLinks>
         </Navigation>
         <MainContent>

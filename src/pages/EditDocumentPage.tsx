@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { ArrowLeft, FileText, Calendar } from "lucide-react";
-import { Link, useLocation } from "react-router-dom";
+import { Link } from "react-router-dom";
 import api from "@/controller/axiosController";
 import { toast } from "react-toastify";
 import { profileType } from "./ProfilePage";
@@ -18,8 +18,6 @@ type Document = {
 };
 
 export default function EditDocumentPage() {
-  const location = useLocation();
-  const state = location.state;
 
   const { userType } = useAuth();
 

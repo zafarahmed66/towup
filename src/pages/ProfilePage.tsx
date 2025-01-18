@@ -13,15 +13,12 @@ import {
   Settings,
   Truck,
   Camera,
-  FileText,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import api from "@/controller/axiosController";
-import useCookie from "@/hooks/useCookie";
 import { InviteUser } from "@/components/InviteUser";
-import { UserType } from "@/types/types";
 import { toast } from "react-toastify";
 import { useAuth } from "@/context/AuthContext";
 
@@ -60,7 +57,7 @@ export const profileType = {
 };
 
 export default function ProfilePage() {
-  const [documents, setDocuments] = useState([]);
+  const [, setDocuments] = useState([]);
   const [data, setData] = useState<UserData>();
   const [isLoading, setIsLoading] = useState(true);
   const [uploading, setUploading] = useState(false);
@@ -125,7 +122,7 @@ export default function ProfilePage() {
         setData(response.data);
         if (userType === "REPO_COMPANY") {
           const documentsResponse = await api.get(
-            `/api/repo-companies/documents/me`
+            `/api/repo-companies/documents/${userId}`
           );
           if (response) {
             setDocuments(documentsResponse.data || []);
@@ -353,7 +350,7 @@ export default function ProfilePage() {
                       </Button>
                     </Link>
                   </div>
-                  <div className="grid gap-3">
+                  {/* <div className="grid gap-3">
                     {documents.map((doc, index) => (
                       <div
                         key={index}
@@ -370,7 +367,7 @@ export default function ProfilePage() {
                         )}
                       </div>
                     ))}
-                  </div>
+                  </div> */}
                 </div>
               )}
 
