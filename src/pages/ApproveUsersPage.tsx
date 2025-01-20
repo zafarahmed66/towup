@@ -4,13 +4,27 @@ import { Button } from "@/components/ui/button";
 import { UserCheck, Trash } from "lucide-react";
 import api from "@/controller/axiosController";
 import { toast } from "react-toastify";
+import { useAuth } from "@/context/AuthContext";
+import { useNavigate } from "react-router-dom";
 
 export interface UserData {
   id: string;
   companyName: string;
   companyEmail: string;
+  operatorName?: string;
   signupStatus: "PENDING" | "APPROVED" | "REJECTED";
   userType: "FLEET_OWNER" | "REPO_COMPANY";
+}
+
+function getEndpointPath(type: string) {
+  switch (type) {
+    case "FLEET_OWNER":
+      return "fleetowners";
+    case "REPO_COMPANY":
+      return "repo-companies";
+    default:
+      return "towtruckoperators";
+  }
 }
 
 const SkeletonCard = () => (
@@ -33,14 +47,27 @@ const SkeletonCard = () => (
 export default function ApproveUsersPage() {
   const [users, setUsers] = useState<UserData[]>([]);
   const [loading, setLoading] = useState(false);
+  const { userType } = useAuth();
+  const navigate = useNavigate();
+  useEffect(() => {
+    if (userType !== "SYS_ADMIN") {
+      toast.error("Unauthorized");
+      navigate("/");
+    }
+  }, [userType, navigate]);
 
   useEffect(() => {
     const fetchUsers = async () => {
       try {
         setLoading(true);
-        const [fleetOwnersResponse, repoCompaniesResponse] = await Promise.all([
+        const [
+          fleetOwnersResponse,
+          repoCompaniesResponse,
+          towOperatorsResponse,
+        ] = await Promise.all([
           api.get("/api/fleetowners"),
           api.get("/api/repo-companies"),
+          api.get("/api/towtruckoperators"),
         ]);
 
         const repoCompanies = repoCompaniesResponse.data.map((user: any) => ({
@@ -55,7 +82,13 @@ export default function ApproveUsersPage() {
           userType: "FLEET_OWNER",
         }));
 
-        setUsers([...fleetOwners, ...repoCompanies]);
+        const towOperators = towOperatorsResponse.data.map((user: any) => ({
+          ...user,
+          id: user.fleetOwnerId,
+          userType: "TOW_TRUCK",
+        }));
+
+        setUsers([...fleetOwners, ...repoCompanies, ...towOperators]);
       } catch (error) {
         console.error("Failed to fetch users:", error);
       } finally {
@@ -68,10 +101,7 @@ export default function ApproveUsersPage() {
 
   const handleApprove = async (userId: string, userType: string) => {
     try {
-      const endpoint =
-        userType === "FLEET_OWNER"
-          ? `/api/fleetowners/${userId}/approve`
-          : `/api/repo-companies/${userId}/approve`;
+      const endpoint = `/api/${getEndpointPath(userType)}/${userId}/approve`;
 
       await api.post(endpoint);
       toast.success("User approved");
@@ -89,10 +119,7 @@ export default function ApproveUsersPage() {
 
   const handleDelete = async (userId: string, userType: string) => {
     try {
-      const endpoint =
-        userType === "FLEET_OWNER"
-          ? `/api/fleetowners/${userId}`
-          : `/api/repo-companies/${userId}`;
+      const endpoint = `/api/${getEndpointPath(userType)}/${userId}`;
 
       await api.delete(endpoint);
       toast.success("User deleted!");
@@ -125,7 +152,7 @@ export default function ApproveUsersPage() {
                 <CardContent className="flex items-center justify-between p-6">
                   <div>
                     <h3 className="text-xl font-semibold text-[#2B4380]">
-                      {user.companyName}
+                      {user.companyName} {user.operatorName}
                     </h3>
                     <p className="text-sm text-gray-600">{user.companyEmail}</p>
                     <p
@@ -137,7 +164,7 @@ export default function ApproveUsersPage() {
                             : "text-yellow-500"
                       }`}
                     >
-                      Status: {user.signupStatus}
+                      {user.signupStatus && "Status:"} {user.signupStatus}
                     </p>
                     <p className="text-xs text-gray-400">
                       User Type: {user.userType}

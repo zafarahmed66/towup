@@ -4,25 +4,37 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
-import { ArrowLeft, FileText, Calendar } from "lucide-react";
-import { Link } from "react-router-dom";
+import { ArrowLeft, FileText, Calendar, FileType } from "lucide-react";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import api from "@/controller/axiosController";
 import { toast } from "react-toastify";
-import { profileType } from "./ProfilePage";
+import { profileType, UserData } from "./ProfilePage";
 import { useAuth } from "@/context/AuthContext";
+import { AxiosError } from "axios";
+import { DocumentData } from "./ApproveDocumentsPage";
+import { format } from "date-fns"; 
 
 type Document = {
+  id?: string;
   file: File | null;
+  documentType: string;
   hasExpiration: boolean;
   expirationDate: string;
 };
 
 export default function EditDocumentPage() {
-
   const { userType } = useAuth();
+  const location = useLocation();
+  const [loading, setLoading] = useState(false);
+
+  const userData = location.state.userData as UserData;
+  const documents = location.state.documents as DocumentData[];
+
+  const navigate = useNavigate();
 
   const [document, setDocument] = useState<Document>({
     file: null,
+    documentType: "",
     hasExpiration: false,
     expirationDate: "",
   });
@@ -38,30 +50,74 @@ export default function EditDocumentPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!document.file) {
-      alert("Please upload a file before submitting.");
+    if (!document.file && !document.id) {
+      toast.warn("Please upload a file before submitting.");
       return;
     }
 
+    if (!document.documentType) {
+      toast.warn("Please specify the document type before submitting.");
+      return;
+    }
+
+    setLoading(true);
+
     try {
       const formData = new FormData();
-      formData.append("file", document.file);
-      formData.append("documentType", "INSURANCE");
+      if (document.file) formData.append("file", document.file);
+      formData.append("documentType", document.documentType);
       formData.append("expirationDate", document.expirationDate);
+      formData.append("companyName", userData.companyName);
+      formData.append("companyId", userData.repoCompanyId!);
 
-      await api.post(`/api/repo-companies/documents/me/upload`, formData, {
+      const endpoint = document.id
+        ? `/api/repo-companies/documents/me/${document.id}/update`
+        : `/api/repo-companies/documents/me/upload`;
+
+      await api.post(endpoint, formData, {
         headers: {
           "Content-Type": "multipart/form-data",
         },
       });
 
-      toast.success("Document uploaded and updated successfully!");
+      toast.success(
+        document.id
+          ? "Document updated successfully!"
+          : "Document uploaded successfully!"
+      );
+      if (userType) {
+        navigate(`${profileType[userType]}`);
+      } else {
+        navigate("/");
+      }
     } catch (error) {
       console.error("Error during document handling:", error);
-      toast.error(
-        "An error occurred while uploading or updating the document."
-      );
+      if (error instanceof AxiosError) {
+        if (error.response?.data) {
+          toast.error(error.response.data.message);
+        } else {
+          toast.error(
+            "An error occurred while uploading or updating the document."
+          );
+        }
+      } else {
+        toast.error(
+          "An error occurred while uploading or updating the document."
+        );
+      }
+    } finally {
+      setLoading(false);
     }
+  };
+
+  const handleEdit = (doc: DocumentData) => {
+    setDocument({
+      id: doc.documentId.toString(),
+      file: null,
+      documentType: doc.documentType || "",
+      hasExpiration: !!doc.expirationDate,
+      expirationDate: doc.expirationDate || "",
+    });
   };
 
   return (
@@ -77,7 +133,7 @@ export default function EditDocumentPage() {
         <Card className="overflow-hidden shadow-lg">
           <CardHeader className="bg-[#3b5998] text-white">
             <CardTitle className="text-2xl font-bold">
-              Edit Official Document
+              {document.id ? "Update Document" : "Upload Document"}
             </CardTitle>
           </CardHeader>
           <CardContent className="p-6">
@@ -89,7 +145,7 @@ export default function EditDocumentPage() {
                     className="flex items-center gap-2"
                   >
                     <FileText className="h-4 w-4 text-[#3b5998]" />
-                    Upload Document
+                    {document.id ? "Update File" : "Upload File"}
                   </Label>
                   <Input
                     id="documentFile"
@@ -97,6 +153,25 @@ export default function EditDocumentPage() {
                     onChange={(e) =>
                       handleFileChange(e.target.files?.[0] || null)
                     }
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label
+                    htmlFor="documentType"
+                    className="flex items-center gap-2"
+                  >
+                    <FileType className="h-4 w-4 text-[#3b5998]" />
+                    Document Type
+                  </Label>
+                  <Input
+                    id="documentType"
+                    type="text"
+                    placeholder="Enter document type (e.g., INSURANCE)"
+                    value={document.documentType}
+                    onChange={(e) =>
+                      handleDocumentChange("documentType", e.target.value)
+                    }
+                    required
                   />
                 </div>
                 <div className="flex items-center space-x-2">
@@ -126,10 +201,10 @@ export default function EditDocumentPage() {
                     <Input
                       id="expirationDate"
                       type="date"
-                      value={document.expirationDate}
-                      onChange={(e) =>
-                        handleDocumentChange("expirationDate", e.target.value)
-                      }
+                      // value={document.expirationDate}
+                      // onChange={(e) =>
+                      //   handleDocumentChange("expirationDate", e.target.value)
+                      // }
                       required
                     />
                   </div>
@@ -138,10 +213,33 @@ export default function EditDocumentPage() {
               <Button
                 type="submit"
                 className="w-full bg-[#3b5998] hover:bg-[#344e86] text-white"
+                disabled={loading}
               >
-                Save Changes
+                {document.id ? "Update Document" : "Upload Document"}
               </Button>
             </form>
+            <div className="mt-6">
+              <h3 className="text-lg font-bold text-[#3b5998]">
+                Existing Documents
+              </h3>
+              <ul className="space-y-2">
+                {documents.map((doc) => (
+                  <li
+                    key={doc.documentId}
+                    className="flex justify-between items-center p-2 bg-gray-100 rounded"
+                  >
+                    <span>{doc.documentType}</span>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handleEdit(doc)}
+                    >
+                      Edit
+                    </Button>
+                  </li>
+                ))}
+              </ul>
+            </div>
           </CardContent>
         </Card>
       </div>

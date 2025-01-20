@@ -18,6 +18,7 @@ import EditOperationalRegions from "./pages/EditRegion";
 import EditDocumentsPage from "./pages/EditDocumentPage";
 import FleetOwnerSignupPage from "./pages/FleetOwnerSignup";
 import RepoCompanySignupPage from "./pages/RepoCompanySignup";
+import ApproveDocumentsPage from "./pages/ApproveDocumentsPage";
 
 function App() {
   return (
@@ -53,6 +54,7 @@ function App() {
           element={<ConfigureNotifications />}
         />
         <Route path="/approve/users" element={<ApproveUsersPage />} />
+        <Route path="/approve/documents" element={<ApproveDocumentsPage />} />
       </Routes>
       <ToastContainer />
     </>

@@ -1,4 +1,3 @@
-
 interface Address {
   street: string;
   city: string;
@@ -35,7 +34,6 @@ export interface Data {
   telematicSettings?: TelematicSettings;
 }
 
-
 export type CookieAttributes = {
   expires?: number | Date;
   path?: string;
@@ -62,5 +60,9 @@ export interface AuthProviderProps {
   children: React.ReactNode;
 }
 
-
-export type UserType = "FLEET_OWNER" | "REPO_COMPANY" | "TOW_OPERATOR" | null;
+export type UserType =
+  | "FLEET_OWNER"
+  | "REPO_COMPANY"
+  | "TOW_TRUCK"
+  | "SYS_ADMIN"
+  | null;
