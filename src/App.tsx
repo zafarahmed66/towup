@@ -1,10 +1,6 @@
-import {  Routes, Route } from "react-router-dom";
+import { Routes, Route } from "react-router-dom";
 import LandingPage from "./pages/LandingPage";
 import LoginPage from "./pages/LoginPage";
-import { GlobalStyles } from "./styles/GlobalStyles";
-
-import "react-toastify/dist/ReactToastify.css";
-import { ToastContainer } from "react-toastify";
 import SignupConfirmationPage from "./pages/signup/SignUpConfirmationPage";
 import EmailValidationPage from "./pages/signup/EmailValidationPage";
 import ProfilePage from "./pages/ProfilePage";
@@ -20,6 +16,10 @@ import FleetOwnerSignupPage from "./pages/FleetOwnerSignup";
 import RepoCompanySignupPage from "./pages/RepoCompanySignup";
 import ApproveDocumentsPage from "./pages/ApproveDocumentsPage";
 import NotFoundPage from "./pages/NotFound";
+import PrivateRoute from "./components/PrivateRoute";
+import { GlobalStyles } from "./styles/GlobalStyles";
+import { ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 function App() {
   return (
@@ -36,26 +36,38 @@ function App() {
           element={<SignupConfirmationPage />}
         />
         <Route path="/verify-email" element={<EmailValidationPage />} />
-        <Route path="/towtruckop/profile" element={<ProfilePage />} />
-        <Route path="/repocompany/profile" element={<ProfilePage />} />
-        <Route path="/fleetowner/profile" element={<ProfilePage />} />
-        <Route path="/profile/account/edit" element={<EditAccountDetails />} />
-        <Route path="/profile/user/edit" element={<EditUserProfile />} />
-        <Route
-          path="/profile/regions/edit"
-          element={<EditOperationalRegions />}
-        />
-        <Route path="/profile/documents/edit" element={<EditDocumentsPage />} />
-        <Route
-          path="/profile/telematics/edit"
-          element={<EditTelematicsInfo />}
-        />
-        <Route
-          path="/profile/notifications"
-          element={<ConfigureNotifications />}
-        />
-        <Route path="/approve/users" element={<ApproveUsersPage />} />
-        <Route path="/approve/documents" element={<ApproveDocumentsPage />} />
+
+        <Route element={<PrivateRoute />}>
+          <Route path="/towtruckop/profile" element={<ProfilePage />} />
+          <Route path="/repocompany/profile" element={<ProfilePage />} />
+          <Route path="/fleetowner/profile" element={<ProfilePage />} />
+          <Route
+            path="/profile/account/edit"
+            element={<EditAccountDetails />}
+          />
+          <Route path="/profile/user/edit" element={<EditUserProfile />} />
+          <Route
+            path="/profile/regions/edit"
+            element={<EditOperationalRegions />}
+          />
+          <Route
+            path="/profile/documents/edit"
+            element={<EditDocumentsPage />}
+          />
+          <Route
+            path="/profile/telematics/edit"
+            element={<EditTelematicsInfo />}
+          />
+          <Route
+            path="/profile/notifications"
+            element={<ConfigureNotifications />}
+          />
+        </Route>
+
+        <Route element={<PrivateRoute requiredRole="SYS_ADMIN" />}>
+          <Route path="/approve/users" element={<ApproveUsersPage />} />
+          <Route path="/approve/documents" element={<ApproveDocumentsPage />} />
+        </Route>
 
         <Route path="*" element={<NotFoundPage />} />
       </Routes>
