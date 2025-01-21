@@ -28,7 +28,7 @@ function App() {
         <Route path="/" element={<LandingPage />} />
         <Route path="/fleetowner/signup" element={<FleetOwnerSignupPage />} />
         <Route path="/repocompany/signup" element={<RepoCompanySignupPage />} />
-        <Route path="/towtruckop/signup" element={<TowTruckSignup />} />
+        <Route path="/towtruckop/register" element={<TowTruckSignup />} />
         <Route path="/login" element={<LoginPage />} />
         <Route
           path="/signup-confirmation"
