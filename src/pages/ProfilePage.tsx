@@ -23,6 +23,8 @@ import { InviteUser } from "@/components/InviteUser";
 import { toast } from "react-toastify";
 import { useAuth } from "@/context/AuthContext";
 import { DocumentData } from "./ApproveDocumentsPage";
+import { format } from "date-fns";
+import { formatDateArray } from "@/lib/utils";
 
 export interface UserData {
   repoCompanyId?: string;
@@ -377,15 +379,22 @@ export default function ProfilePage() {
                           key={index}
                           className="flex items-center justify-between"
                         >
-                          <div className="flex items-center gap-3 text-sm">
-                            <FileText className="h-5 w-5 text-[#3b5998]" />
-                            <span>{doc.documentType}</span>
+                          <div className="">
+                            <div className="flex items-center gap-3 text">
+                              <FileText className="h-5 w-5 text-[#3b5998]" />
+                              <span>{doc.documentType}</span>
+                            </div>
+
+                            {doc.expirationDate && (
+                              <span className="text-sm text-gray-500">
+                                Expires:{" "}
+                                {format(
+                                  formatDateArray(doc.expirationDate),
+                                  "MM-dd-yyyy"
+                                )}
+                              </span>
+                            )}
                           </div>
-                          {doc.expirationDate && (
-                            <span className="text-sm text-gray-500">
-                              Expires: {doc.expirationDate}
-                            </span>
-                          )}
 
                           <p
                             className={`text-sm font-medium mt-2 ${

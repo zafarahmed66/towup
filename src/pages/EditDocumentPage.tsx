@@ -12,13 +12,16 @@ import { profileType, UserData } from "./ProfilePage";
 import { useAuth } from "@/context/AuthContext";
 import { AxiosError } from "axios";
 import { DocumentData } from "./ApproveDocumentsPage";
+import { DatePicker } from "@/components/ui/date-picker";
+import { format } from "date-fns";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 type Document = {
   id?: string;
   file: File | null;
   documentType: string;
   hasExpiration: boolean;
-  expirationDate: string;
+  expirationDate: number[] | Date | string;
 };
 
 export default function EditDocumentPage() {
@@ -35,7 +38,7 @@ export default function EditDocumentPage() {
     file: null,
     documentType: "",
     hasExpiration: false,
-    expirationDate: "",
+    expirationDate: new Date(),
   });
 
   const handleDocumentChange = (field: keyof Document, value: any) => {
@@ -65,7 +68,9 @@ export default function EditDocumentPage() {
       const formData = new FormData();
       if (document.file) formData.append("file", document.file);
       formData.append("documentType", document.documentType);
-      formData.append("expirationDate", document.expirationDate);
+      if (document.hasExpiration) {
+        formData.append("expirationDate", document.expirationDate as string);
+      }
       formData.append("companyName", userData.companyName);
       formData.append("companyId", userData.repoCompanyId!);
 
@@ -162,16 +167,22 @@ export default function EditDocumentPage() {
                     <FileType className="h-4 w-4 text-[#3b5998]" />
                     Document Type
                   </Label>
-                  <Input
-                    id="documentType"
-                    type="text"
-                    placeholder="Enter document type (e.g., INSURANCE)"
+                  <Select
+                    onValueChange={(value) => {
+                      handleDocumentChange("documentType", value);
+                    }}
                     value={document.documentType}
-                    onChange={(e) =>
-                      handleDocumentChange("documentType", e.target.value)
-                    }
-                    required
-                  />
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select telematics provider" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="INSURANCE">INSURANCE</SelectItem>
+                      <SelectItem value="BUSINESS_LICENSE">
+                        BUSINESS_LICENSE
+                      </SelectItem>
+                    </SelectContent>
+                  </Select>
                 </div>
                 <div className="flex items-center space-x-2">
                   <Checkbox
@@ -197,14 +208,14 @@ export default function EditDocumentPage() {
                       <Calendar className="h-4 w-4 text-[#3b5998]" />
                       Expiration Date
                     </Label>
-                    <Input
-                      id="expirationDate"
-                      type="date"
-                      // value={document.expirationDate}
-                      // onChange={(e) =>
-                      //   handleDocumentChange("expirationDate", e.target.value)
-                      // }
-                      required
+                    <DatePicker
+                      date={document.expirationDate || ""}
+                      onSelect={(date) =>
+                        handleDocumentChange(
+                          "expirationDate",
+                          date ? format(date, "MM-dd-yyyy") : ""
+                        )
+                      }
                     />
                   </div>
                 )}
@@ -214,7 +225,11 @@ export default function EditDocumentPage() {
                 className="w-full bg-[#3b5998] hover:bg-[#344e86] text-white"
                 disabled={loading}
               >
-                {document.id ? "Update Document" : "Upload Document"}
+                {loading
+                  ? "Processing..."
+                  : document.id
+                    ? "Update Document"
+                    : "Upload Document"}
               </Button>
             </form>
             <div className="mt-6">

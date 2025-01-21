@@ -19,6 +19,7 @@ import EditDocumentsPage from "./pages/EditDocumentPage";
 import FleetOwnerSignupPage from "./pages/FleetOwnerSignup";
 import RepoCompanySignupPage from "./pages/RepoCompanySignup";
 import ApproveDocumentsPage from "./pages/ApproveDocumentsPage";
+import NotFoundPage from "./pages/NotFound";
 
 function App() {
   return (
@@ -55,6 +56,8 @@ function App() {
         />
         <Route path="/approve/users" element={<ApproveUsersPage />} />
         <Route path="/approve/documents" element={<ApproveDocumentsPage />} />
+
+        <Route path="*" element={<NotFoundPage />} />
       </Routes>
       <ToastContainer />
     </>

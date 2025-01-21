@@ -12,7 +12,7 @@ export interface DocumentData {
   documentType: string;
   documentUrl: string;
   status: "PENDING" | "APPROVED" | "REJECTED";
-  expirationDate: string | null;
+  expirationDate: number[] | null;
   createdAt: string | null;
   updatedAt: string | null;
   companyId: number | null;
