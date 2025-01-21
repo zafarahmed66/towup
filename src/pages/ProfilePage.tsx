@@ -312,7 +312,7 @@ export default function ProfilePage() {
                         </div>
                         <div className="flex items-center gap-3 text-sm">
                           <Lock className="h-5 w-5 text-[#3b5998]" />
-                          <span>API Key: ••••••••••••••••</span>
+                            <span>API Key: { data?.telematicSettings?.telematicApiKey}</span>
                         </div>
                       </div>
                     </div>
