@@ -20,6 +20,7 @@ import PrivateRoute from "./components/PrivateRoute";
 import { GlobalStyles } from "./styles/GlobalStyles";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import TowTruckEditPage from "./pages/TowTruckEditPage";
 
 function App() {
   return (
@@ -46,6 +47,7 @@ function App() {
             element={<EditAccountDetails />}
           />
           <Route path="/profile/user/edit" element={<EditUserProfile />} />
+          <Route path="/profile/towtruck/edit" element={<TowTruckEditPage />} />
           <Route
             path="/profile/regions/edit"
             element={<EditOperationalRegions />}

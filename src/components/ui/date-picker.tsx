@@ -1,15 +1,8 @@
 import * as React from "react";
-import {
-  format,
-  getMonth,
-  getYear,
-  setMonth,
-  setYear,
-  parseISO,
-} from "date-fns";
+import { format, getMonth, getYear, setMonth, setYear } from "date-fns";
 import { Calendar as CalendarIcon } from "lucide-react";
 
-import { cn } from "@/lib/utils";
+import { cn, parseDate } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
 import {
@@ -38,13 +31,6 @@ export function DatePicker({
   onSelect,
   date: providedDate,
 }: DatePickerProps) {
-  const parseDate = (date: Date | number[] | string | undefined): Date => {
-    if (date instanceof Date) return date;
-    if (Array.isArray(date)) return new Date(date[0], date[1] - 1, date[2]); 
-    if (typeof date === "string") return parseISO(date); 
-    return new Date(); 
-  };
-
   const [date, setDate] = React.useState<Date>(parseDate(providedDate));
 
   const months = [

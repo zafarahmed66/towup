@@ -53,6 +53,9 @@ export interface UserData {
     telematicApiKey: string;
   };
   operationalRegions?: string[];
+  operatorName?: string;
+  licenseNumber?: string;
+  operationalRegion?: string;
 }
 
 export const profileType = {
@@ -312,7 +315,9 @@ export default function ProfilePage() {
                         </div>
                         <div className="flex items-center gap-3 text-sm">
                           <Lock className="h-5 w-5 text-[#3b5998]" />
-                            <span>API Key: { data?.telematicSettings?.telematicApiKey}</span>
+                          <span>
+                            API Key: {data?.telematicSettings?.telematicApiKey}
+                          </span>
                         </div>
                       </div>
                     </div>
@@ -379,44 +384,35 @@ export default function ProfilePage() {
                           key={index}
                           className="flex items-center justify-between"
                         >
-                          <div className="">
-                            <div className="flex items-center gap-3 text">
-                              <FileText className="h-5 w-5 text-[#3b5998]" />
-                              <span>{doc.documentType}</span>
-                            </div>
-
-                            {doc.expirationDate && (
-                              <span className="text-sm text-gray-500">
-                                Expires:{" "}
-                                {format(
-                                  formatDateArray(doc.expirationDate),
-                                  "MM-dd-yyyy"
-                                )}
-                              </span>
-                            )}
+                          <div className="flex items-center gap-3 text">
+                            <FileText className="h-5 w-5 text-[#3b5998]" />
+                            <span>
+                              {doc.documentType} (
+                              <a
+                                href={doc.documentUrl}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="text-blue-500"
+                              >
+                                View
+                              </a>
+                              )
+                            </span>
                           </div>
-
-                          <p
-                            className={`text-sm font-medium mt-2 ${
-                              doc.status === "APPROVED"
-                                ? "text-green-500"
-                                : doc.status === "REJECTED"
-                                  ? "text-red-500"
-                                  : "text-yellow-500"
-                            }`}
-                          >
-                            Status: {doc.status}
-                          </p>
-                          <a
-                            href={doc.documentUrl}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="text-blue-500 text-xs"
-                          >
-                            View Document
-                          </a>
+                          {doc.expirationDate && (
+                            <span className="text-sm text-gray-500">
+                              Expires:{" "}
+                              {format(
+                                formatDateArray(doc.expirationDate),
+                                "MM-dd-yyyy"
+                              )}
+                            </span>
+                          )}
                         </div>
                       ))}
+                      {documents.length === 0 && (
+                        <span className="text-sm">No documents provided.</span>
+                      )}
                     </div>
                   </div>
                 )}
@@ -506,49 +502,167 @@ export default function ProfilePage() {
         )}
 
         {userType === "TOW_TRUCK" && (
-          <Card className="overflow-hidden shadow-lg">
-            {isLoading ? (
-              <div className="p-4 space-y-4">
-                <div className="bg-gray-300 rounded-lg h-36 animate-pulse"></div>
-                <div className="h-48 bg-gray-300 rounded-lg animate-pulse"></div>
-                <div className="bg-gray-300 rounded-lg h-36 animate-pulse"></div>
-              </div>
-            ) : (
-              <CardContent>
-                <div className="p-4 rounded-lg shadow-sm bg-gray-50 sm:p-6">
-                  <div className="flex items-center justify-between mb-4">
-                    <h3 className="text-xl font-semibold text-[#2B4380]">
-                      User Profile
-                    </h3>
-                    <Link to="/profile/user/edit" state={data}>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        className="bg-[#3b5998] text-white hover:bg-[#344e86] hover:text-white"
-                      >
-                        <Edit className="w-4 h-4 mr-2" />
-                        Edit
-                      </Button>
-                    </Link>
+          <>
+            <Card className="overflow-hidden shadow-lg">
+              <div className="bg-gradient-to-r from-[#3b5998] to-[#2B4380] p-6">
+                <div className="flex flex-col items-center gap-4 sm:flex-row sm:gap-6">
+                  <div
+                    className="relative cursor-pointer group"
+                    onClick={handleImageClick}
+                  >
+                    <input
+                      type="file"
+                      ref={fileInputRef}
+                      className="hidden"
+                      accept="image/*"
+                      onChange={handleImageChange}
+                    />
+                    <div className="p-1 bg-white rounded-full shadow-md">
+                      {data?.profilePictureUrl ? (
+                        <img
+                          src={data.profilePictureUrl as string}
+                          alt="Profile"
+                          className="object-cover w-24 h-24 rounded-full"
+                        />
+                      ) : (
+                        <div className="h-24 w-24 rounded-full bg-[#4CAF50] text-white flex items-center justify-center text-3xl font-bold">
+                          TO
+                        </div>
+                      )}
+                    </div>
+                    <div className="absolute inset-0 flex items-center justify-center transition-opacity bg-black bg-opacity-50 rounded-full opacity-0 group-hover:opacity-100">
+                      <Camera className="w-6 h-6 text-white" />
+                    </div>
+                    {uploading && (
+                      <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50 rounded-full">
+                        <div className="w-6 h-6 border-2 border-white rounded-full border-t-transparent animate-spin"></div>
+                      </div>
+                    )}
                   </div>
-                  <div className="grid gap-3">
-                    <div className="flex items-center gap-3 text-sm">
-                      <User className="h-5 w-5 text-[#3b5998]" />
-                      <span>{data?.user.fullname}</span>
-                    </div>
-                    <div className="flex items-center gap-3 text-sm">
-                      <Mail className="h-5 w-5 text-[#3b5998]" />
-                      <span>{data?.user.email}</span>
-                    </div>
-                    <div className="flex items-center gap-3 text-sm">
-                      <Phone className="h-5 w-5 text-[#3b5998]" />
-                      <span>{data?.user.phoneNumber}</span>
-                    </div>
+                  <div>
+                    <h2 className="text-3xl font-bold text-white">
+                      {data?.user.fullname}
+                    </h2>
+                    <p className="text-white text-lg">{ data?.operatorName}</p>
                   </div>
                 </div>
-              </CardContent>
-            )}
-          </Card>
+              </div>
+              {isLoading ? (
+                <div className="p-4 space-y-4">
+                  <div className="bg-gray-300 rounded-lg h-36 animate-pulse"></div>
+                  <div className="h-48 bg-gray-300 rounded-lg animate-pulse"></div>
+                  <div className="bg-gray-300 rounded-lg h-36 animate-pulse"></div>
+                </div>
+              ) : (
+                <CardContent className="pt-6 space-y-8">
+                  {/* User Details  */}
+                  <div className="p-4 rounded-lg shadow-sm bg-gray-50 sm:p-6">
+                    <div className="flex items-center justify-between mb-4">
+                      <h3 className="text-xl font-semibold text-[#2B4380]">
+                        User Profile
+                      </h3>
+                      <Link to="/profile/user/edit" state={data}>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="bg-[#3b5998] text-white hover:bg-[#344e86] hover:text-white"
+                        >
+                          <Edit className="w-4 h-4 mr-2" />
+                          Edit
+                        </Button>
+                      </Link>
+                    </div>
+                    <div className="grid gap-3">
+                      <div className="flex items-center gap-3 text-sm">
+                        <User className="h-5 w-5 text-[#3b5998]" />
+                        <span>{data?.user.fullname}</span>
+                      </div>
+                      <div className="flex items-center gap-3 text-sm">
+                        <Mail className="h-5 w-5 text-[#3b5998]" />
+                        <span>{data?.user.email}</span>
+                      </div>
+                      <div className="flex items-center gap-3 text-sm">
+                        <Phone className="h-5 w-5 text-[#3b5998]" />
+                        <span>{data?.user.phoneNumber}</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Account Details  */}
+                  <div className="p-4 rounded-lg shadow-sm bg-gray-50 sm:p-6">
+                    <div className="flex items-center justify-between mb-4">
+                      <h3 className="text-xl font-semibold text-[#2B4380]">
+                        Account Details
+                      </h3>
+                      <Link to="/profile/towtruck/edit" state={data}>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="bg-[#3b5998] text-white hover:bg-[#344e86] hover:text-white"
+                        >
+                          <Edit className="w-4 h-4 mr-2" />
+                          Edit
+                        </Button>
+                      </Link>
+                    </div>
+                    <div className="grid gap-3">
+                      <div className="flex items-center gap-3 text-sm">
+                        <Lock className="h-5 w-5 text-[#3b5998]" />
+                        <span>License Number: {data?.licenseNumber}</span>
+                      </div>
+                      <div className="flex items-center gap-3 text-sm">
+                        <MapPin className="h-5 w-5 text-[#3b5998]" />
+                        <span>
+                          Operational Region: {data?.operationalRegion}
+                        </span>
+                      </div>
+                      <div className="flex items-center gap-3 text-sm">
+                        <Building2 className="h-5 w-5 text-[#3b5998]" />
+                        <span>Operator Name: {data?.operatorName}</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="p-4 rounded-lg shadow-sm bg-gray-50 sm:p-6">
+                    <h3 className="text-xl font-semibold text-[#2B4380] mb-4">
+                      Preferences
+                    </h3>
+                    <div className="space-y-4">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-3">
+                          <Bell className="h-5 w-5 text-[#3b5998]" />
+                          <div>
+                            <span className="text-sm font-medium">
+                              Notifications
+                            </span>
+                            <p className="text-xs text-gray-500">
+                              Email, SMS, and in-app notifications
+                            </p>
+                          </div>
+                        </div>
+                        <Link to="/profile/notifications" state={data}>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="bg-[#3b5998] text-white hover:bg-[#344e86] hover:text-white"
+                          >
+                            Configure
+                          </Button>
+                        </Link>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="flex justify-end">
+                    <Button variant="destructive" size="sm" onClick={onLogOut}>
+                      <LogOut className="w-4 h-4 mr-2" />
+                      Sign Out
+                    </Button>
+                  </div>
+                </CardContent>
+              )}
+            </Card>
+          </>
         )}
       </div>
     </div>
