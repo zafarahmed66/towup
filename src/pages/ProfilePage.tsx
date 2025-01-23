@@ -543,7 +543,7 @@ export default function ProfilePage() {
                     <h2 className="text-3xl font-bold text-white">
                       {data?.user.fullname}
                     </h2>
-                    <p className="text-white text-lg">{ data?.operatorName}</p>
+                    <p className="text-white text-lg">{data?.operatorName}</p>
                   </div>
                 </div>
               </div>
@@ -555,39 +555,6 @@ export default function ProfilePage() {
                 </div>
               ) : (
                 <CardContent className="pt-6 space-y-8">
-                  {/* User Details  */}
-                  <div className="p-4 rounded-lg shadow-sm bg-gray-50 sm:p-6">
-                    <div className="flex items-center justify-between mb-4">
-                      <h3 className="text-xl font-semibold text-[#2B4380]">
-                        User Profile
-                      </h3>
-                      <Link to="/profile/user/edit" state={data}>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          className="bg-[#3b5998] text-white hover:bg-[#344e86] hover:text-white"
-                        >
-                          <Edit className="w-4 h-4 mr-2" />
-                          Edit
-                        </Button>
-                      </Link>
-                    </div>
-                    <div className="grid gap-3">
-                      <div className="flex items-center gap-3 text-sm">
-                        <User className="h-5 w-5 text-[#3b5998]" />
-                        <span>{data?.user.fullname}</span>
-                      </div>
-                      <div className="flex items-center gap-3 text-sm">
-                        <Mail className="h-5 w-5 text-[#3b5998]" />
-                        <span>{data?.user.email}</span>
-                      </div>
-                      <div className="flex items-center gap-3 text-sm">
-                        <Phone className="h-5 w-5 text-[#3b5998]" />
-                        <span>{data?.user.phoneNumber}</span>
-                      </div>
-                    </div>
-                  </div>
-
                   {/* Account Details  */}
                   <div className="p-4 rounded-lg shadow-sm bg-gray-50 sm:p-6">
                     <div className="flex items-center justify-between mb-4">
@@ -619,6 +586,39 @@ export default function ProfilePage() {
                       <div className="flex items-center gap-3 text-sm">
                         <Building2 className="h-5 w-5 text-[#3b5998]" />
                         <span>Operator Name: {data?.operatorName}</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* User Details  */}
+                  <div className="p-4 rounded-lg shadow-sm bg-gray-50 sm:p-6">
+                    <div className="flex items-center justify-between mb-4">
+                      <h3 className="text-xl font-semibold text-[#2B4380]">
+                        User Profile
+                      </h3>
+                      <Link to="/profile/user/edit" state={data}>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="bg-[#3b5998] text-white hover:bg-[#344e86] hover:text-white"
+                        >
+                          <Edit className="w-4 h-4 mr-2" />
+                          Edit
+                        </Button>
+                      </Link>
+                    </div>
+                    <div className="grid gap-3">
+                      <div className="flex items-center gap-3 text-sm">
+                        <User className="h-5 w-5 text-[#3b5998]" />
+                        <span>{data?.user.fullname}</span>
+                      </div>
+                      <div className="flex items-center gap-3 text-sm">
+                        <Mail className="h-5 w-5 text-[#3b5998]" />
+                        <span>{data?.user.email}</span>
+                      </div>
+                      <div className="flex items-center gap-3 text-sm">
+                        <Phone className="h-5 w-5 text-[#3b5998]" />
+                        <span>{data?.user.phoneNumber}</span>
                       </div>
                     </div>
                   </div>

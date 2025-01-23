@@ -21,6 +21,8 @@ import { GlobalStyles } from "./styles/GlobalStyles";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import TowTruckEditPage from "./pages/TowTruckEditPage";
+import TowTruckPublicProfilePage from "./pages/TowTruckPublicProfilePage";
+import RepoCompanyPublicProfilePage from "./pages/RepoCompanyPublicProfilePage";
 
 function App() {
   return (
@@ -40,7 +42,9 @@ function App() {
 
         <Route element={<PrivateRoute />}>
           <Route path="/towtruckop/profile" element={<ProfilePage />} />
+          <Route path="/towtruckop/profile/:id" element={<TowTruckPublicProfilePage />} />
           <Route path="/repocompany/profile" element={<ProfilePage />} />
+          <Route path="/repocompany/profile/:id" element={<RepoCompanyPublicProfilePage />} />
           <Route path="/fleetowner/profile" element={<ProfilePage />} />
           <Route
             path="/profile/account/edit"
