@@ -15,6 +15,7 @@ import { UserData } from "./ProfilePage";
 import { useNavigate, useParams } from "react-router-dom";
 import { AxiosError } from "axios";
 import { toast } from "react-toastify";
+import ProfileHeader from "@/components/ProfileHeader";
 
 export default function RepoCompanyPublicProfilePage() {
   const [data, setData] = useState<UserData>();
@@ -48,31 +49,10 @@ export default function RepoCompanyPublicProfilePage() {
     <div className="min-h-screen bg-[#2B4380] w-screen">
       <div className="max-w-4xl p-4 mx-auto space-y-4 md:p-8">
         <Card className="overflow-hidden shadow-lg">
-          <div className="bg-gradient-to-r from-[#3b5998] to-[#2B4380] p-6">
-            <div className="flex flex-col items-center gap-4 sm:flex-row sm:gap-6">
-              <div className="relative cursor-pointer group">
-                <input type="file" className="hidden" accept="image/*" />
-                <div className="p-1 bg-white rounded-full shadow-md">
-                  {data?.profilePictureUrl ? (
-                    <img
-                      src={data.profilePictureUrl as string}
-                      alt="Profile"
-                      className="object-cover w-24 h-24 rounded-full"
-                    />
-                  ) : (
-                    <div className="h-24 w-24 rounded-full bg-[#4CAF50] text-white flex items-center justify-center text-3xl font-bold">
-                      RO
-                    </div>
-                  )}
-                </div>
-              </div>
-              <div>
-                <h2 className="text-3xl font-bold text-white">
-                  {data?.companyName}
-                </h2>
-              </div>
-            </div>
-          </div>
+          <ProfileHeader
+            name={data?.companyName || ""}
+            image={(data?.profilePictureUrl as string) || ""}
+          />
           {isLoading ? ( // Skeleton Loader
             <div className="p-4 space-y-4">
               <div className="bg-gray-300 rounded-lg h-36 animate-pulse"></div>
@@ -149,8 +129,6 @@ export default function RepoCompanyPublicProfilePage() {
                   </div>
                 </div>
               </div>
-
-            
             </CardContent>
           )}
         </Card>
