@@ -150,27 +150,7 @@ export default function RepoCompanyPublicProfilePage() {
                 </div>
               </div>
 
-              {/* Preferences Section */}
-              <div className="p-4 rounded-lg shadow-sm bg-gray-50 sm:p-6">
-                <h3 className="text-xl font-semibold text-[#2B4380] mb-4">
-                  Preferences
-                </h3>
-                <div className="space-y-4">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      <Bell className="h-5 w-5 text-[#3b5998]" />
-                      <div>
-                        <span className="text-sm font-medium">
-                          Notifications
-                        </span>
-                        <p className="text-xs text-gray-500">
-                          Email, SMS, and in-app notifications
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
+            
             </CardContent>
           )}
         </Card>
