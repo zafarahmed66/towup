@@ -93,7 +93,7 @@ export default function EditUserProfile() {
       password: "",
       confirmPassword: "",
     });
-  }, [isEditingPassword, reset, state.user]);
+  }, [reset, state.user]);
 
   const onSubmit = async (data: FormValues) => {
     try {

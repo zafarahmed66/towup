@@ -1,14 +1,6 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import { useState, useEffect } from "react";
-import {
-  Bell,
-  MapPin,
-  Phone,
-  Mail,
-  Building2,
-  User,
-  Lock,
-} from "lucide-react";
+import { Bell, MapPin, Phone, Mail, Building2, User, Lock } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import api from "@/controller/axiosController";
 import { UserData } from "./ProfilePage";
@@ -45,13 +37,16 @@ export default function TowTruckPublicProfilePage() {
     fetchUserType();
   }, []);
 
+
+
   return (
     <div className="min-h-screen bg-[#2B4380] w-screen">
       <div className="max-w-4xl p-4 mx-auto space-y-4 md:p-8">
         <Card className="overflow-hidden shadow-lg">
           <ProfileHeader
-            name={data?.companyName || ""}
+            companyName={data?.companyName || ""}
             image={(data?.profilePictureUrl as string) || ""}
+            name={data?.operatorName || ""}
           />
           {isLoading ? (
             <div className="p-4 space-y-4">

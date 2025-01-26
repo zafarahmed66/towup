@@ -96,7 +96,7 @@ export default function LoginPage() {
               <FormField
                 control={form.control}
                 name="email"
-                render={({ field }) => (
+                render={() => (
                   <div className="space-y-2">
                     <FormLabel
                       htmlFor="email"
@@ -108,7 +108,9 @@ export default function LoginPage() {
                     <Input
                       id="email"
                       placeholder="john@example.com"
-                      {...field}
+                      onChange={(e) =>
+                        form.setValue("email", e.target.value.trim())
+                      }
                     />
                     <FormMessage />
                   </div>
@@ -151,7 +153,10 @@ export default function LoginPage() {
           <div className="mt-4 text-center">
             <p className="text-sm text-gray-600">
               Don't have an account?{" "}
-              <Link to="/fleetowner/signup" className="text-[#3b5998] hover:underline">
+              <Link
+                to="/fleetowner/signup"
+                className="text-[#3b5998] hover:underline"
+              >
                 Sign up
               </Link>
             </p>
