@@ -11,7 +11,7 @@ import { Form, FormField, FormLabel, FormMessage } from "@/components/ui/form";
 import axiosClient from "@/controller/axiosController";
 import { AxiosError } from "axios";
 import { toast } from "react-toastify";
-import useCookie from "@/hooks/useCookie";
+import { useAuth } from "@/context/AuthContext";
 
 const formSchema = z.object({
   email: z.string().email(),
@@ -21,13 +21,7 @@ const formSchema = z.object({
 });
 
 export default function LoginPage() {
-  const [_token, setToken, _removeToken] = useCookie("token", "");
-  const [_expiresIn, setExpiresIn, _removeExpiresIn] = useCookie(
-    "expiresIn",
-    ""
-  );
-  const [_userType, setUserType, _removeUserType] = useCookie("userType", "");
-  const [_userId, setUserId, _removeUserId] = useCookie("userId", "");
+  const { setAuthData } = useAuth();
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -42,31 +36,9 @@ export default function LoginPage() {
     try {
       const { data } = await axiosClient.post("/auth/login", values);
       if (data) {
-        if (data.token) {
-          const expirationDays = data.expiresIn / (60 * 60 * 24);
-          setUserId(data.entityId, {
-            expires: expirationDays,
-            secure: true,
-            sameSite: "strict",
-          });
-          setUserType(data.userType, {
-            expires: expirationDays,
-            secure: true,
-            sameSite: "strict",
-          });
-          setToken(data.token, {
-            expires: expirationDays,
-            secure: true,
-            sameSite: "strict",
-          });
-          setExpiresIn(data.expiresIn, {
-            expires: expirationDays,
-            secure: true,
-            sameSite: "strict",
-          });
-          toast.success("Welcome! You've signed in successfully!");
-          navigate("/");
-        }
+        setAuthData(data);
+        toast.success("Welcome! You've signed in successfully!");
+        navigate("/");
       }
     } catch (error) {
       console.error(error);

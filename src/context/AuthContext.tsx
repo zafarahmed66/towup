@@ -1,66 +1,109 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
-import React, { createContext, useContext, useEffect } from "react";
+import React, {
+  createContext,
+  useContext,
+  useEffect,
+  useCallback,
+} from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import useCookie from "@/hooks/useCookie";
-import { AuthContextType, AuthProviderProps, UserType } from "@/types/types";
+import {
+  AuthContextType,
+  AuthData,
+  AuthProviderProps,
+  UserType,
+} from "@/types/types";
 
 export const AuthContext = createContext<AuthContextType | null>(null);
 
 export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
-  const [token, setToken, removeToken] = useCookie("token", null);
-  const [expiresIn, _setExpiresIn, removeExpiresIn] = useCookie(
+  const [token, setToken, removeToken] = useCookie<string>("token", "");
+  const [expiresIn, setExpiresIn, removeExpiresIn] = useCookie<number>(
     "expiresIn",
+    0
+  );
+  const [userType, setUserType, removeUserType] = useCookie<UserType>(
+    "userType",
     null
   );
-  const [userType, setUserType, removeUserType] = useCookie<UserType>("userType", null);
-  const [userId, setUserId, removeUserId] = useCookie("userId", null);
+  const [userId, setUserId, removeUserId] = useCookie<string>("userId", "");
 
   const navigate = useNavigate();
 
-    const onLogOut = (event: any) => {
+  const clearAuthData = useCallback(() => {
+    removeToken();
+    removeExpiresIn();
+    removeUserType();
+    removeUserId();
+  }, [removeToken, removeExpiresIn, removeUserType, removeUserId]);
+
+  const handleLogout = useCallback(
+    (message?: string, redirectPath: string = "/login") => {
+      if (message) {
+        toast.warning(message);
+      }
+      clearAuthData();
+      navigate(redirectPath);
+    },
+    [clearAuthData, navigate]
+  );
+
+  const setAuthData = useCallback(
+    (data: AuthData) => {
+      const expirationTimestamp = Date.now() + data.expiresIn;
+      const expirationDate = new Date(expirationTimestamp);
+
+      const cookieOptions = {
+        expires: expirationDate,
+        secure: true,
+        sameSite: "strict" as const,
+      };
+
+      setToken(data.token, cookieOptions);
+      setExpiresIn(expirationTimestamp, cookieOptions);
+      setUserId(data.entityId, cookieOptions);
+      setUserType(data.userType, cookieOptions);
+    },
+    [setToken, setExpiresIn, setUserId, setUserType]
+  );
+
+  const onLogOut = useCallback(
+    (event: React.MouseEvent<HTMLElement>) => {
       event.preventDefault();
-      removeToken();
-      removeExpiresIn();
-      removeUserType();
-      removeUserId();
-      navigate("/login");
-    };
+      handleLogout("Logged out successfully");
+    },
+    [handleLogout]
+  );
 
   useEffect(() => {
-    if (expiresIn) {
-      const currentTime = Date.now();
-      const expirationTime = currentTime + expiresIn; 
-      const remainingTime = expirationTime - currentTime;
-
-      if (remainingTime > 0) {
-        const timer = setTimeout(() => {
-          toast.warning("Session expired. Logging out...");
-          removeToken();
-          removeExpiresIn();
-          removeUserId();
-          removeUserType();
+    const checkTokenExpiration = () => {
+      if (!token) {
+        if (!window.location.pathname.includes("/login")) {
           navigate("/login");
-        }, remainingTime);
-
-        return () => clearTimeout(timer);
-      } else {
-        toast.warning("Session expired. Logging out...");
-        removeToken();
-        removeExpiresIn();
-        removeUserId();
-        removeUserType();
-        navigate("/login");
+        }
+        return;
       }
-    }
-  }, [
-    expiresIn,
-    removeToken,
-    removeExpiresIn,
-    removeUserId,
-    removeUserType,
-    navigate,
-  ]);
+
+      if (!expiresIn) {
+        handleLogout("Session information missing");
+        return;
+      }
+
+      const currentTime = Date.now();
+      const remainingTime = expiresIn - currentTime;
+
+      if (remainingTime <= 0) {
+        handleLogout("Session expired");
+        return;
+      }
+    };
+
+    checkTokenExpiration();
+
+    const intervalId = setInterval(checkTokenExpiration, 60000);
+
+    return () => clearInterval(intervalId);
+  }, [token, expiresIn, handleLogout, navigate]);
 
   const contextValue: AuthContextType = {
     token,
@@ -72,7 +115,10 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     userId,
     setUserId,
     removeUserId,
-    onLogOut
+    onLogOut,
+    setAuthData,
+    handleLogout,
+    setExpiresIn,
   };
 
   return (
@@ -80,7 +126,6 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   );
 };
 
-// Custom hook to use AuthContext
 export const useAuth = () => {
   const context = useContext(AuthContext);
   if (!context) {

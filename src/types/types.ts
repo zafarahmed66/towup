@@ -45,15 +45,25 @@ export type CookieAttributes = {
 
 export interface AuthContextType {
   token: string | null;
-  setToken: (value: null, options: CookieAttributes) => void;
+  setToken: (value: string, options: CookieAttributes) => void;
   removeToken: () => void;
   userType: UserType | null;
-  setUserType: (value: null, options: CookieAttributes) => void;
+  setUserType: (value: UserType | null, options: CookieAttributes) => void;
   removeUserType: () => void;
   userId: string | null;
-  setUserId: (value: null, options: CookieAttributes) => void;
+  setUserId: (value: string, options: CookieAttributes) => void;
   removeUserId: () => void;
-  onLogOut: (event: any) => void;
+  onLogOut: (event: React.MouseEvent<HTMLElement>) => void;
+  setExpiresIn: (value: number, options: CookieAttributes) => void;
+  setAuthData: (data: AuthData) => void;
+  handleLogout: (message?: string, redirectPath?: string) => void;
+}
+
+export interface AuthData {
+  token: string;
+  expiresIn: number;
+  entityId: string;
+  userType: UserType;
 }
 
 export interface AuthProviderProps {
