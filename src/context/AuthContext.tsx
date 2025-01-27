@@ -77,12 +77,6 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   useEffect(() => {
     const checkTokenExpiration = () => {
-      if (!token) {
-        if (!window.location.pathname.includes("/login")) {
-          navigate("/login");
-        }
-        return;
-      }
 
       if (!expiresIn) {
         handleLogout("Session information missing");
@@ -98,7 +92,9 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       }
     };
 
-    checkTokenExpiration();
+    if (token) {
+      checkTokenExpiration();
+    }
 
     const intervalId = setInterval(checkTokenExpiration, 60000);
 
