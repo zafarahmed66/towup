@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import { useState, useEffect } from "react";
-import { Bell, MapPin, Phone, Mail, Building2, User, Lock } from "lucide-react";
+import {  MapPin, Phone, Mail, Building2, User, Lock } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import api from "@/controller/axiosController";
 import { UserData } from "./ProfilePage";
