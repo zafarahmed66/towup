@@ -8,15 +8,21 @@ import { useNavigate, useParams } from "react-router-dom";
 import { AxiosError } from "axios";
 import { toast } from "react-toastify";
 import ProfileHeader from "@/components/ProfileHeader";
+import { useAuth } from "@/context/AuthContext";
 
 export default function TowTruckPublicProfilePage() {
   const [data, setData] = useState<UserData>();
   const [isLoading, setIsLoading] = useState(true);
   const params = useParams();
   const navigate = useNavigate();
+  const { userId } = useAuth();
   const id = params.id;
 
   useEffect(() => {
+    if (Number(userId) === Number(id)) {
+      navigate("/towtruckop/profile");
+      return;
+    }
     const fetchUserType = async () => {
       try {
         const response = await api.get(`/api/towtruckoperators/${id}`);

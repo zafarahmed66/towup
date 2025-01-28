@@ -19,6 +19,7 @@ import ProfileHeader from "@/components/ProfileHeader";
 import { DocumentData } from "./ApproveDocumentsPage";
 import { format } from "date-fns";
 import { formatDateArray } from "@/lib/utils";
+import { useAuth } from "@/context/AuthContext";
 
 export default function RepoCompanyPublicProfilePage() {
   const [data, setData] = useState<UserData>();
@@ -26,9 +27,14 @@ export default function RepoCompanyPublicProfilePage() {
   const [isLoading, setIsLoading] = useState(true);
   const params = useParams();
   const navigate = useNavigate();
+  const { userId } = useAuth();
   const id = params.id;
 
   useEffect(() => {
+    if (Number(userId) === Number(id)) {
+      navigate("/repocompany/profile");
+      return;
+    }
     const fetchUserType = async () => {
       try {
         const response = await api.get(`/api/repo-companies/${id}`);

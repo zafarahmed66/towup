@@ -77,7 +77,12 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   useEffect(() => {
     const checkTokenExpiration = () => {
-
+      if (
+        window.location.pathname.includes("/signup") ||
+        window.location.pathname.includes("/login")
+      ) {
+        return;
+      }
       if (!expiresIn) {
         handleLogout("Session information missing");
         return;
