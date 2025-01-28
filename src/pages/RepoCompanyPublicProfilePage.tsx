@@ -39,6 +39,9 @@ export default function RepoCompanyPublicProfilePage() {
           if (error.status === 403) {
             navigate("/");
             toast.error("Unauthorized");
+          } else if (error.status === 404) {
+            navigate("/");
+            toast.error("No user found");
           }
         }
       } finally {

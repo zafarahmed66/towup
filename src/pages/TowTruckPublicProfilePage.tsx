@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import { useState, useEffect } from "react";
-import {  MapPin, Phone, Mail, Building2, User, Lock } from "lucide-react";
+import { MapPin, Phone, Mail, Building2, User, Lock } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import api from "@/controller/axiosController";
 import { UserData } from "./ProfilePage";
@@ -27,6 +27,9 @@ export default function TowTruckPublicProfilePage() {
           if (error.status === 403) {
             navigate("/");
             toast.error("Unauthorized");
+          } else if (error.status === 404) {
+            navigate("/");
+            toast.error("No user found");
           }
         }
       } finally {
@@ -36,8 +39,6 @@ export default function TowTruckPublicProfilePage() {
 
     fetchUserType();
   }, []);
-
-
 
   return (
     <div className="min-h-screen bg-[#2B4380] w-screen">
