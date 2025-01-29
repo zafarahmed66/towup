@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/ban-ts-comment */
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import { useState, useEffect } from "react";
 import { MapPin, Phone, Mail, Building2, User, Lock } from "lucide-react";
@@ -15,11 +16,11 @@ export default function TowTruckPublicProfilePage() {
   const [isLoading, setIsLoading] = useState(true);
   const params = useParams();
   const navigate = useNavigate();
-  const { userId } = useAuth();
+  const { userId, userType } = useAuth();
   const id = params.id;
 
   useEffect(() => {
-    if (Number(userId) === Number(id)) {
+    if (Number(userId) === Number(id) && userType === "TOW_TRUCK") {
       navigate("/towtruckop/profile");
       return;
     }
@@ -32,7 +33,7 @@ export default function TowTruckPublicProfilePage() {
         if (error instanceof AxiosError) {
           if (error.status === 403) {
             navigate("/");
-            toast.error("Unauthorized");
+            toast.error("Unauthorized!!!!");
           } else if (error.status === 404) {
             navigate("/");
             toast.error("No user found");
@@ -51,7 +52,8 @@ export default function TowTruckPublicProfilePage() {
       <div className="max-w-4xl p-4 mx-auto space-y-4 md:p-8">
         <Card className="overflow-hidden shadow-lg">
           <ProfileHeader
-            companyName={data?.companyName || ""}
+            // @ts-expect-error
+            companyName={data?.repoCompany.companyName || ""}
             image={(data?.profilePictureUrl as string) || ""}
             name={data?.operatorName || ""}
           />

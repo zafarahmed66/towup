@@ -4,6 +4,7 @@ type Props = {
   companyName: string;
 };
 const ProfileHeader = ({ image, companyName, name }: Props) => {
+  console.log(companyName)
   return (
     <div className="bg-gradient-to-r from-[#3b5998] to-[#2B4380] p-6">
       <div className="flex flex-col items-center gap-4 sm:flex-row sm:gap-6">

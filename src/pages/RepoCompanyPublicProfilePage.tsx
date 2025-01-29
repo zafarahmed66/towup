@@ -27,11 +27,11 @@ export default function RepoCompanyPublicProfilePage() {
   const [isLoading, setIsLoading] = useState(true);
   const params = useParams();
   const navigate = useNavigate();
-  const { userId } = useAuth();
+  const { userId, userType } = useAuth();
   const id = params.id;
 
   useEffect(() => {
-    if (Number(userId) === Number(id)) {
+    if (Number(userId) === Number(id) && userType === "REPO_COMPANY") {
       navigate("/repocompany/profile");
       return;
     }
@@ -48,6 +48,8 @@ export default function RepoCompanyPublicProfilePage() {
           } else if (error.status === 404) {
             navigate("/");
             toast.error("No user found");
+          } else {
+            navigate("/");
           }
         }
       } finally {
@@ -67,7 +69,9 @@ export default function RepoCompanyPublicProfilePage() {
     };
 
     fetchUserType();
-    fetchDocuments();
+    if (userType === "FLEET_OWNER") {
+      fetchDocuments();
+    }
   }, []);
 
   return (
@@ -135,7 +139,7 @@ export default function RepoCompanyPublicProfilePage() {
                   </div>
                 </div>
               </div>
-              {documents.length !== 0 && (
+              {userType === "FLEET_OWNER" && (
                 <div className="p-4 rounded-lg shadow-sm bg-gray-50 sm:p-6">
                   <div className="flex items-center justify-between mb-4">
                     <h3 className="text-xl font-semibold text-[#2B4380]">
@@ -174,6 +178,9 @@ export default function RepoCompanyPublicProfilePage() {
                         )}
                       </div>
                     ))}
+                    {documents.length === 0 && (
+                      <span className="text-sm">No documents provided.</span>
+                    )}
                   </div>
                 </div>
               )}
