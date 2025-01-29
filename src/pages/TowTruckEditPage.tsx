@@ -20,6 +20,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { useState } from "react";
 
 const editAccountSchema = z.object({
   operatorName: z.string().min(1, "Company name is required"),
@@ -32,6 +33,7 @@ type EditAccountFormValues = z.infer<typeof editAccountSchema>;
 export default function TowTruckEditPage() {
   const location = useLocation();
   const state = location.state as UserData;
+  const [region, setRegion] = useState(state.operationalRegion || "");
 
   const { userType, userId } = useAuth();
 
@@ -139,8 +141,9 @@ export default function TowTruckEditPage() {
                 <Select
                   onValueChange={(value) => {
                     setValue("operationalRegion", value);
+                    setRegion(value);
                   }}
-                  value={operationalRegion}
+                  value={region}
                 >
                   <SelectTrigger>
                     <SelectValue placeholder="Select a region" />
@@ -154,7 +157,7 @@ export default function TowTruckEditPage() {
                     </SelectItem>
                   </SelectContent>
                 </Select>
-   
+
                 {errors.operationalRegion && (
                   <p className="text-sm text-red-500">
                     {errors.operationalRegion.message}
