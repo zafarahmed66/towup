@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/ban-ts-comment */
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import { useState, useEffect } from "react";
 import { MapPin, Phone, Mail, Building2, User, Lock } from "lucide-react";
@@ -52,8 +51,7 @@ export default function TowTruckPublicProfilePage() {
       <div className="max-w-4xl p-4 mx-auto space-y-4 md:p-8">
         <Card className="overflow-hidden shadow-lg">
           <ProfileHeader
-            // @ts-expect-error
-            companyName={data?.repoCompany.companyName || ""}
+            companyName={data?.user.fullname || ""}
             image={(data?.profilePictureUrl as string) || ""}
             name={data?.operatorName || ""}
           />
